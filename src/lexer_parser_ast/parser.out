@@ -1,0 +1,502 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    AND
+    ARRAY
+    ASSIN
+    BEGIN
+    BOOL
+    BREAK
+    CAHR
+    CASE
+    COMMENT
+    CONST
+    CONTINUE
+    DO
+    ELSE
+    END
+    EQ
+    EXIT
+    FOR
+    FUNCTION
+    GEQ
+    GOTO
+    GT
+    ID
+    IF
+    INT
+    LEQ
+    LITERAL_CHAR
+    LITERAL_STRING
+    LT
+    NEQ
+    NOT
+    OF
+    OR
+    PROCEDURE
+    PROGRAM
+    RANGE
+    REAL
+    RECORD
+    REPEAT
+    STRING
+    THEN
+    TO
+    TYPE
+    UNTIL
+    VAR
+    WHILE
+
+Grammar
+
+Rule 0     S' -> exp
+Rule 1     exp -> exp + exp
+Rule 2     exp -> exp - exp
+Rule 3     exp -> exp * exp
+Rule 4     exp -> exp / exp
+Rule 5     exp -> exp % exp
+Rule 6     exp -> ( exp )
+Rule 7     exp -> LITERAL_INT
+Rule 8     exp -> LITERAL_REAL
+Rule 9     exp -> - exp
+
+Terminals, with rules where they appear
+
+%                    : 5
+(                    : 6
+)                    : 6
+*                    : 3
++                    : 1
+-                    : 2 9
+/                    : 4
+AND                  : 
+ARRAY                : 
+ASSIN                : 
+BEGIN                : 
+BOOL                 : 
+BREAK                : 
+CAHR                 : 
+CASE                 : 
+COMMENT              : 
+CONST                : 
+CONTINUE             : 
+DO                   : 
+ELSE                 : 
+END                  : 
+EQ                   : 
+EXIT                 : 
+FOR                  : 
+FUNCTION             : 
+GEQ                  : 
+GOTO                 : 
+GT                   : 
+ID                   : 
+IF                   : 
+INT                  : 
+LEQ                  : 
+LITERAL_CHAR         : 
+LITERAL_INT          : 7
+LITERAL_REAL         : 8
+LITERAL_STRING       : 
+LT                   : 
+NEQ                  : 
+NOT                  : 
+OF                   : 
+OR                   : 
+PROCEDURE            : 
+PROGRAM              : 
+RANGE                : 
+REAL                 : 
+RECORD               : 
+REPEAT               : 
+STRING               : 
+THEN                 : 
+TO                   : 
+TYPE                 : 
+UNTIL                : 
+VAR                  : 
+WHILE                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+exp                  : 1 1 2 2 3 3 4 4 5 5 6 9 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 1
+
+state 1
+
+    (0) S' -> exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               shift and go to state 6
+    -               shift and go to state 7
+    *               shift and go to state 8
+    /               shift and go to state 9
+    %               shift and go to state 10
+
+
+state 2
+
+    (9) exp -> - . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 11
+
+state 3
+
+    (6) exp -> ( . exp )
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 12
+
+state 4
+
+    (7) exp -> LITERAL_INT .
+
+    +               reduce using rule 7 (exp -> LITERAL_INT .)
+    -               reduce using rule 7 (exp -> LITERAL_INT .)
+    *               reduce using rule 7 (exp -> LITERAL_INT .)
+    /               reduce using rule 7 (exp -> LITERAL_INT .)
+    %               reduce using rule 7 (exp -> LITERAL_INT .)
+    $end            reduce using rule 7 (exp -> LITERAL_INT .)
+    )               reduce using rule 7 (exp -> LITERAL_INT .)
+
+
+state 5
+
+    (8) exp -> LITERAL_REAL .
+
+    +               reduce using rule 8 (exp -> LITERAL_REAL .)
+    -               reduce using rule 8 (exp -> LITERAL_REAL .)
+    *               reduce using rule 8 (exp -> LITERAL_REAL .)
+    /               reduce using rule 8 (exp -> LITERAL_REAL .)
+    %               reduce using rule 8 (exp -> LITERAL_REAL .)
+    $end            reduce using rule 8 (exp -> LITERAL_REAL .)
+    )               reduce using rule 8 (exp -> LITERAL_REAL .)
+
+
+state 6
+
+    (1) exp -> exp + . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 13
+
+state 7
+
+    (2) exp -> exp - . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 14
+
+state 8
+
+    (3) exp -> exp * . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 15
+
+state 9
+
+    (4) exp -> exp / . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 16
+
+state 10
+
+    (5) exp -> exp % . exp
+    (1) exp -> . exp + exp
+    (2) exp -> . exp - exp
+    (3) exp -> . exp * exp
+    (4) exp -> . exp / exp
+    (5) exp -> . exp % exp
+    (6) exp -> . ( exp )
+    (7) exp -> . LITERAL_INT
+    (8) exp -> . LITERAL_REAL
+    (9) exp -> . - exp
+
+    (               shift and go to state 3
+    LITERAL_INT     shift and go to state 4
+    LITERAL_REAL    shift and go to state 5
+    -               shift and go to state 2
+
+    exp                            shift and go to state 17
+
+state 11
+
+    (9) exp -> - exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 9 (exp -> - exp .)
+    -               reduce using rule 9 (exp -> - exp .)
+    *               reduce using rule 9 (exp -> - exp .)
+    /               reduce using rule 9 (exp -> - exp .)
+    %               reduce using rule 9 (exp -> - exp .)
+    $end            reduce using rule 9 (exp -> - exp .)
+    )               reduce using rule 9 (exp -> - exp .)
+
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+  ! *               [ shift and go to state 8 ]
+  ! /               [ shift and go to state 9 ]
+  ! %               [ shift and go to state 10 ]
+
+
+state 12
+
+    (6) exp -> ( exp . )
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    )               shift and go to state 18
+    +               shift and go to state 6
+    -               shift and go to state 7
+    *               shift and go to state 8
+    /               shift and go to state 9
+    %               shift and go to state 10
+
+
+state 13
+
+    (1) exp -> exp + exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 1 (exp -> exp + exp .)
+    -               reduce using rule 1 (exp -> exp + exp .)
+    $end            reduce using rule 1 (exp -> exp + exp .)
+    )               reduce using rule 1 (exp -> exp + exp .)
+    *               shift and go to state 8
+    /               shift and go to state 9
+    %               shift and go to state 10
+
+  ! *               [ reduce using rule 1 (exp -> exp + exp .) ]
+  ! /               [ reduce using rule 1 (exp -> exp + exp .) ]
+  ! %               [ reduce using rule 1 (exp -> exp + exp .) ]
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+
+
+state 14
+
+    (2) exp -> exp - exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 2 (exp -> exp - exp .)
+    -               reduce using rule 2 (exp -> exp - exp .)
+    $end            reduce using rule 2 (exp -> exp - exp .)
+    )               reduce using rule 2 (exp -> exp - exp .)
+    *               shift and go to state 8
+    /               shift and go to state 9
+    %               shift and go to state 10
+
+  ! *               [ reduce using rule 2 (exp -> exp - exp .) ]
+  ! /               [ reduce using rule 2 (exp -> exp - exp .) ]
+  ! %               [ reduce using rule 2 (exp -> exp - exp .) ]
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+
+
+state 15
+
+    (3) exp -> exp * exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 3 (exp -> exp * exp .)
+    -               reduce using rule 3 (exp -> exp * exp .)
+    *               reduce using rule 3 (exp -> exp * exp .)
+    /               reduce using rule 3 (exp -> exp * exp .)
+    %               reduce using rule 3 (exp -> exp * exp .)
+    $end            reduce using rule 3 (exp -> exp * exp .)
+    )               reduce using rule 3 (exp -> exp * exp .)
+
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+  ! *               [ shift and go to state 8 ]
+  ! /               [ shift and go to state 9 ]
+  ! %               [ shift and go to state 10 ]
+
+
+state 16
+
+    (4) exp -> exp / exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 4 (exp -> exp / exp .)
+    -               reduce using rule 4 (exp -> exp / exp .)
+    *               reduce using rule 4 (exp -> exp / exp .)
+    /               reduce using rule 4 (exp -> exp / exp .)
+    %               reduce using rule 4 (exp -> exp / exp .)
+    $end            reduce using rule 4 (exp -> exp / exp .)
+    )               reduce using rule 4 (exp -> exp / exp .)
+
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+  ! *               [ shift and go to state 8 ]
+  ! /               [ shift and go to state 9 ]
+  ! %               [ shift and go to state 10 ]
+
+
+state 17
+
+    (5) exp -> exp % exp .
+    (1) exp -> exp . + exp
+    (2) exp -> exp . - exp
+    (3) exp -> exp . * exp
+    (4) exp -> exp . / exp
+    (5) exp -> exp . % exp
+
+    +               reduce using rule 5 (exp -> exp % exp .)
+    -               reduce using rule 5 (exp -> exp % exp .)
+    *               reduce using rule 5 (exp -> exp % exp .)
+    /               reduce using rule 5 (exp -> exp % exp .)
+    %               reduce using rule 5 (exp -> exp % exp .)
+    $end            reduce using rule 5 (exp -> exp % exp .)
+    )               reduce using rule 5 (exp -> exp % exp .)
+
+  ! +               [ shift and go to state 6 ]
+  ! -               [ shift and go to state 7 ]
+  ! *               [ shift and go to state 8 ]
+  ! /               [ shift and go to state 9 ]
+  ! %               [ shift and go to state 10 ]
+
+
+state 18
+
+    (6) exp -> ( exp ) .
+
+    +               reduce using rule 6 (exp -> ( exp ) .)
+    -               reduce using rule 6 (exp -> ( exp ) .)
+    *               reduce using rule 6 (exp -> ( exp ) .)
+    /               reduce using rule 6 (exp -> ( exp ) .)
+    %               reduce using rule 6 (exp -> ( exp ) .)
+    $end            reduce using rule 6 (exp -> ( exp ) .)
+    )               reduce using rule 6 (exp -> ( exp ) .)
+
