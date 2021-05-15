@@ -1,0 +1,14 @@
+program sample;
+{ ------------------------------------------------------------ }
+const
+PI = 3.1415926;
+RST = False;
+MSG = 'A simple test.';
+type
+int = Integer;
+double = Real;
+MONTHS = (JAN, FEB, MAR, APR);	{ Enumerate }
+{ ------------------------------ }
+BEGIN 
+not(5.0*(1--4)+2.1 and 123)
+end.

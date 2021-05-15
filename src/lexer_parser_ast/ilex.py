@@ -9,9 +9,9 @@ reserve_words = {
     'integer' : 'INT',  # data type
     'real' : 'REAL',
     'boolean' : 'BOOL',
-    'char' : 'CAHR',
-    'array' : 'ARRAY',
+    'char' : 'CHAR',
     'string' : 'STRING',
+    'array' : 'ARRAY',
     'record' : 'RECORD',
     'begin' : 'BEGIN',  # begin ... end;
     'end' : 'END',
@@ -39,7 +39,7 @@ reserve_words = {
 
 # list of tokens
 tokens = [
-    'LITERAL_INT', 'LITERAL_REAL', 'LITERAL_CHAR', 'LITERAL_STRING',
+    'LITERAL_INT', 'LITERAL_REAL', 'LITERAL_CHAR', 'LITERAL_STRING', 'LITERAL_BOOL',
     'EQ', 'NEQ', 'LT', 'GT', 'LEQ', 'GEQ', # relational operators
     'ID',
     'ASSIN',
@@ -71,6 +71,10 @@ def t_LITERAL_REAL(t):
 def t_LITERAL_INT(t):
     r'\d+'
     t.value = int(t.value)
+    return t
+
+def t_LITERAL_BOOL(t):
+    r'(true)|(false)'
     return t
 
 def t_LITERAL_CHAR(t):
@@ -115,7 +119,9 @@ if __name__ == '__main__':
     '''.lower()
 
     # Give the lexer some input
-    lexer.input('program begin \'\' \'c\' -7.0 1..2 \'str\' end.')
+    lexer.input(data)
+    # lexer.input('false program begin \'\' \'c\' -7.0 1..2 \'str\' end.')
+    
 
     # Tokenize
     for tok in lexer:   # same as tok = lexer.token() and tok != None

@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = "nonassocLTGTLEQGEQleft+-left*/%rightUMINUSAND ARRAY ASSIN BEGIN BOOL BREAK CAHR CASE COMMENT CONST CONTINUE DO ELSE END EQ EXIT FOR FUNCTION GEQ GOTO GT ID IF INT LEQ LITERAL_CHAR LITERAL_INT LITERAL_REAL LITERAL_STRING LT NEQ NOT OF OR PROCEDURE PROGRAM RANGE REAL RECORD REPEAT STRING THEN TO TYPE UNTIL VAR WHILEexp : exp '+' exp\n           | exp '-' exp\n           | exp '*' exp\n           | exp '/' exp\n           | exp '%' exp\n           | '(' exp ')'\n           | LITERAL_INT\n           | LITERAL_REALexp : '-' exp %prec UMINUS"
+_lr_signature = "leftORleftANDnonassocEQNEQnonassocLTGTLEQGEQleft+-left*/%rightUMINUSNOTAND ARRAY ASSIN BEGIN BOOL BREAK CASE CHAR COMMENT CONST CONTINUE DO ELSE END EQ EXIT FOR FUNCTION GEQ GOTO GT ID IF INT LEQ LITERAL_BOOL LITERAL_CHAR LITERAL_INT LITERAL_REAL LITERAL_STRING LT NEQ NOT OF OR PROCEDURE PROGRAM RANGE REAL RECORD REPEAT STRING THEN TO TYPE UNTIL VAR WHILEprogram : head_block decl_block main_block\n    head_block : PROGRAM ID ';'\n    decl_block : const_part type_part\n    const_part : CONST const_exp_list\n                  | empty\n    const_exp_list : const_exp const_exp_list\n                      | const_exp\n    const_exp : ID EQ exp ';'\n    type_part : TYPE type_decl_list\n                 | empty\n    type_decl_list : type_decl type_decl_list\n                      | type_decl\n    type_decl : ID EQ type_def ';'\n    type_def : sys_type_def\n                | enum_type_def\n    sys_type_def : INT\n                    | REAL\n                    | BOOL\n                    | CHAR\n                    | STRING\n                    | ID\n    enum_type_def : '(' enum_elem_list ')'\n    enum_elem_list : enum_elem ',' enum_elem_list\n                      | enum_elem\n    enum_elem : ID\n    \n    \n    main_block : BEGIN exp END '.'\n    exp : exp '+' exp\n           | exp '-' exp\n           | exp '*' exp\n           | exp '/' exp\n           | exp '%' exp\n           | '(' exp ')'\n           | relat_exp\n           | LITERAL_INT\n           | LITERAL_REAL\n           | LITERAL_BOOL\n           | LITERAL_CHAR\n           | LITERAL_STRING\n           relat_exp : exp EQ exp\n                 | exp NEQ exp\n                 | exp LT exp\n                 | exp GT exp\n                 | exp LEQ exp\n                 | exp GEQ exp\n                 | exp AND exp\n                 | exp OR exp\n                 | NOT exp\n    exp : '-' exp %prec UMINUSempty :"
     
-_lr_action_items = {'(':([0,2,3,6,7,8,9,10,],[3,3,3,3,3,3,3,3,]),'LITERAL_INT':([0,2,3,6,7,8,9,10,],[4,4,4,4,4,4,4,4,]),'LITERAL_REAL':([0,2,3,6,7,8,9,10,],[5,5,5,5,5,5,5,5,]),'-':([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,],[2,7,2,2,-7,-8,2,2,2,2,2,-9,7,-1,-2,-3,-4,-5,-6,]),'$end':([1,4,5,11,13,14,15,16,17,18,],[0,-7,-8,-9,-1,-2,-3,-4,-5,-6,]),'+':([1,4,5,11,12,13,14,15,16,17,18,],[6,-7,-8,-9,6,-1,-2,-3,-4,-5,-6,]),'*':([1,4,5,11,12,13,14,15,16,17,18,],[8,-7,-8,-9,8,8,8,-3,-4,-5,-6,]),'/':([1,4,5,11,12,13,14,15,16,17,18,],[9,-7,-8,-9,9,9,9,-3,-4,-5,-6,]),'%':([1,4,5,11,12,13,14,15,16,17,18,],[10,-7,-8,-9,10,10,10,-3,-4,-5,-6,]),')':([4,5,11,12,13,14,15,16,17,18,],[-7,-8,-9,18,-1,-2,-3,-4,-5,-6,]),}
+_lr_action_items = {'PROGRAM':([0,],[3,]),'$end':([1,9,53,],[0,-1,-26,]),'CONST':([2,17,],[6,-2,]),'TYPE':([2,5,7,14,15,17,31,78,],[-49,12,-5,-4,-7,-2,-6,-8,]),'BEGIN':([2,4,5,7,11,13,14,15,17,28,29,31,50,78,79,],[-49,10,-49,-5,-3,-10,-4,-7,-2,-9,-12,-6,-11,-8,-13,]),'ID':([3,6,12,15,29,51,77,78,79,84,],[8,16,30,16,30,68,82,-8,-13,82,]),';':([8,21,22,23,24,25,26,47,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,83,],[17,-33,-34,-35,-36,-37,-38,-48,-47,78,-27,-28,-29,-30,-31,-39,-40,-41,-42,-43,-44,-45,-46,-32,-21,79,-14,-15,-16,-17,-18,-19,-20,-22,]),'(':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,51,],[20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,20,77,]),'LITERAL_INT':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,]),'LITERAL_REAL':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,]),'LITERAL_BOOL':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,]),'LITERAL_CHAR':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,]),'LITERAL_STRING':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,26,]),'-':([10,18,19,20,21,22,23,24,25,26,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[19,35,19,19,-33,-34,-35,-36,-37,-38,19,19,19,19,19,19,19,19,19,19,19,19,19,19,19,-48,35,-47,35,-27,-28,-29,-30,-31,35,35,35,35,35,35,35,35,-32,]),'NOT':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,27,]),'EQ':([16,18,21,22,23,24,25,26,30,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[32,39,-33,-34,-35,-36,-37,-38,51,-48,39,-47,39,-27,-28,-29,-30,-31,None,None,-41,-42,-43,-44,39,39,-32,]),'END':([18,21,22,23,24,25,26,47,49,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[33,-33,-34,-35,-36,-37,-38,-48,-47,-27,-28,-29,-30,-31,-39,-40,-41,-42,-43,-44,-45,-46,-32,]),'+':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[34,-33,-34,-35,-36,-37,-38,-48,34,-47,34,-27,-28,-29,-30,-31,34,34,34,34,34,34,34,34,-32,]),'*':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[36,-33,-34,-35,-36,-37,-38,-48,36,-47,36,36,36,-29,-30,-31,36,36,36,36,36,36,36,36,-32,]),'/':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[37,-33,-34,-35,-36,-37,-38,-48,37,-47,37,37,37,-29,-30,-31,37,37,37,37,37,37,37,37,-32,]),'%':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[38,-33,-34,-35,-36,-37,-38,-48,38,-47,38,38,38,-29,-30,-31,38,38,38,38,38,38,38,38,-32,]),'NEQ':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[40,-33,-34,-35,-36,-37,-38,-48,40,-47,40,-27,-28,-29,-30,-31,None,None,-41,-42,-43,-44,40,40,-32,]),'LT':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[41,-33,-34,-35,-36,-37,-38,-48,41,-47,41,-27,-28,-29,-30,-31,41,41,None,None,None,None,41,41,-32,]),'GT':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[42,-33,-34,-35,-36,-37,-38,-48,42,-47,42,-27,-28,-29,-30,-31,42,42,None,None,None,None,42,42,-32,]),'LEQ':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[43,-33,-34,-35,-36,-37,-38,-48,43,-47,43,-27,-28,-29,-30,-31,43,43,None,None,None,None,43,43,-32,]),'GEQ':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[44,-33,-34,-35,-36,-37,-38,-48,44,-47,44,-27,-28,-29,-30,-31,44,44,None,None,None,None,44,44,-32,]),'AND':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[45,-33,-34,-35,-36,-37,-38,-48,45,-47,45,-27,-28,-29,-30,-31,-39,-40,-41,-42,-43,-44,-45,45,-32,]),'OR':([18,21,22,23,24,25,26,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,],[46,-33,-34,-35,-36,-37,-38,-48,46,-47,46,-27,-28,-29,-30,-31,-39,-40,-41,-42,-43,-44,-45,-46,-32,]),')':([21,22,23,24,25,26,47,48,49,54,55,56,57,58,59,60,61,62,63,64,65,66,67,80,81,82,85,],[-33,-34,-35,-36,-37,-38,-48,67,-47,-27,-28,-29,-30,-31,-39,-40,-41,-42,-43,-44,-45,-46,-32,83,-24,-25,-23,]),'.':([33,],[53,]),'INT':([51,],[72,]),'REAL':([51,],[73,]),'BOOL':([51,],[74,]),'CHAR':([51,],[75,]),'STRING':([51,],[76,]),',':([81,82,],[84,-25,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'exp':([0,2,3,6,7,8,9,10,],[1,11,12,13,14,15,16,17,]),}
+_lr_goto_items = {'program':([0,],[1,]),'head_block':([0,],[2,]),'decl_block':([2,],[4,]),'const_part':([2,],[5,]),'empty':([2,5,],[7,13,]),'main_block':([4,],[9,]),'type_part':([5,],[11,]),'const_exp_list':([6,15,],[14,31,]),'const_exp':([6,15,],[15,15,]),'exp':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[18,47,48,49,52,54,55,56,57,58,59,60,61,62,63,64,65,66,]),'relat_exp':([10,19,20,27,32,34,35,36,37,38,39,40,41,42,43,44,45,46,],[21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,]),'type_decl_list':([12,29,],[28,50,]),'type_decl':([12,29,],[29,29,]),'type_def':([51,],[69,]),'sys_type_def':([51,],[70,]),'enum_type_def':([51,],[71,]),'enum_elem_list':([77,84,],[80,85,]),'enum_elem':([77,84,],[81,81,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -26,14 +26,54 @@ for _k, _v in _lr_goto_items.items():
        _lr_goto[_x][_k] = _y
 del _lr_goto_items
 _lr_productions = [
-  ("S' -> exp","S'",1,None,None,None),
-  ('exp -> exp + exp','exp',3,'p_exp','yacc_calc.py',12),
-  ('exp -> exp - exp','exp',3,'p_exp','yacc_calc.py',13),
-  ('exp -> exp * exp','exp',3,'p_exp','yacc_calc.py',14),
-  ('exp -> exp / exp','exp',3,'p_exp','yacc_calc.py',15),
-  ('exp -> exp % exp','exp',3,'p_exp','yacc_calc.py',16),
-  ('exp -> ( exp )','exp',3,'p_exp','yacc_calc.py',17),
-  ('exp -> LITERAL_INT','exp',1,'p_exp','yacc_calc.py',18),
-  ('exp -> LITERAL_REAL','exp',1,'p_exp','yacc_calc.py',19),
-  ('exp -> - exp','exp',2,'p_exp_uminus','yacc_calc.py',36),
+  ("S' -> program","S'",1,None,None,None),
+  ('program -> head_block decl_block main_block','program',3,'p_program','iyacc.py',17),
+  ('head_block -> PROGRAM ID ;','head_block',3,'p_head_block','iyacc.py',22),
+  ('decl_block -> const_part type_part','decl_block',2,'p_decl_block','iyacc.py',27),
+  ('const_part -> CONST const_exp_list','const_part',2,'p_const_part','iyacc.py',34),
+  ('const_part -> empty','const_part',1,'p_const_part','iyacc.py',35),
+  ('const_exp_list -> const_exp const_exp_list','const_exp_list',2,'p_const_exp_list','iyacc.py',43),
+  ('const_exp_list -> const_exp','const_exp_list',1,'p_const_exp_list','iyacc.py',44),
+  ('const_exp -> ID EQ exp ;','const_exp',4,'p_const_exp','iyacc.py',52),
+  ('type_part -> TYPE type_decl_list','type_part',2,'p_type_part','iyacc.py',57),
+  ('type_part -> empty','type_part',1,'p_type_part','iyacc.py',58),
+  ('type_decl_list -> type_decl type_decl_list','type_decl_list',2,'p_type_decl_list','iyacc.py',66),
+  ('type_decl_list -> type_decl','type_decl_list',1,'p_type_decl_list','iyacc.py',67),
+  ('type_decl -> ID EQ type_def ;','type_decl',4,'p_type_decl','iyacc.py',75),
+  ('type_def -> sys_type_def','type_def',1,'p_type_def','iyacc.py',80),
+  ('type_def -> enum_type_def','type_def',1,'p_type_def','iyacc.py',81),
+  ('sys_type_def -> INT','sys_type_def',1,'p_sys_type_def','iyacc.py',88),
+  ('sys_type_def -> REAL','sys_type_def',1,'p_sys_type_def','iyacc.py',89),
+  ('sys_type_def -> BOOL','sys_type_def',1,'p_sys_type_def','iyacc.py',90),
+  ('sys_type_def -> CHAR','sys_type_def',1,'p_sys_type_def','iyacc.py',91),
+  ('sys_type_def -> STRING','sys_type_def',1,'p_sys_type_def','iyacc.py',92),
+  ('sys_type_def -> ID','sys_type_def',1,'p_sys_type_def','iyacc.py',93),
+  ('enum_type_def -> ( enum_elem_list )','enum_type_def',3,'p_enum_type_def','iyacc.py',99),
+  ('enum_elem_list -> enum_elem , enum_elem_list','enum_elem_list',3,'p_enum_elem_list','iyacc.py',105),
+  ('enum_elem_list -> enum_elem','enum_elem_list',1,'p_enum_elem_list','iyacc.py',106),
+  ('enum_elem -> ID','enum_elem',1,'p_enum_elem','iyacc.py',114),
+  ('main_block -> BEGIN exp END .','main_block',4,'p_main_block','iyacc.py',127),
+  ('exp -> exp + exp','exp',3,'p_exp','iyacc.py',132),
+  ('exp -> exp - exp','exp',3,'p_exp','iyacc.py',133),
+  ('exp -> exp * exp','exp',3,'p_exp','iyacc.py',134),
+  ('exp -> exp / exp','exp',3,'p_exp','iyacc.py',135),
+  ('exp -> exp % exp','exp',3,'p_exp','iyacc.py',136),
+  ('exp -> ( exp )','exp',3,'p_exp','iyacc.py',137),
+  ('exp -> relat_exp','exp',1,'p_exp','iyacc.py',138),
+  ('exp -> LITERAL_INT','exp',1,'p_exp','iyacc.py',139),
+  ('exp -> LITERAL_REAL','exp',1,'p_exp','iyacc.py',140),
+  ('exp -> LITERAL_BOOL','exp',1,'p_exp','iyacc.py',141),
+  ('exp -> LITERAL_CHAR','exp',1,'p_exp','iyacc.py',142),
+  ('exp -> LITERAL_STRING','exp',1,'p_exp','iyacc.py',143),
+  ('relat_exp -> exp EQ exp','relat_exp',3,'p_relat_exp','iyacc.py',156),
+  ('relat_exp -> exp NEQ exp','relat_exp',3,'p_relat_exp','iyacc.py',157),
+  ('relat_exp -> exp LT exp','relat_exp',3,'p_relat_exp','iyacc.py',158),
+  ('relat_exp -> exp GT exp','relat_exp',3,'p_relat_exp','iyacc.py',159),
+  ('relat_exp -> exp LEQ exp','relat_exp',3,'p_relat_exp','iyacc.py',160),
+  ('relat_exp -> exp GEQ exp','relat_exp',3,'p_relat_exp','iyacc.py',161),
+  ('relat_exp -> exp AND exp','relat_exp',3,'p_relat_exp','iyacc.py',162),
+  ('relat_exp -> exp OR exp','relat_exp',3,'p_relat_exp','iyacc.py',163),
+  ('relat_exp -> NOT exp','relat_exp',2,'p_relat_exp','iyacc.py',164),
+  ('exp -> - exp','exp',2,'p_exp_uminus','iyacc.py',187),
+  ('empty -> <empty>','empty',0,'p_empty','iyacc.py',192),
 ]

@@ -2,118 +2,140 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
-    AND
     ARRAY
     ASSIN
-    BEGIN
-    BOOL
     BREAK
-    CAHR
     CASE
     COMMENT
-    CONST
     CONTINUE
     DO
     ELSE
-    END
-    EQ
     EXIT
     FOR
     FUNCTION
-    GEQ
     GOTO
-    GT
-    ID
     IF
-    INT
-    LEQ
-    LITERAL_CHAR
-    LITERAL_STRING
-    LT
-    NEQ
-    NOT
     OF
-    OR
     PROCEDURE
-    PROGRAM
     RANGE
-    REAL
     RECORD
     REPEAT
-    STRING
     THEN
     TO
-    TYPE
     UNTIL
     VAR
     WHILE
 
 Grammar
 
-Rule 0     S' -> exp
-Rule 1     exp -> exp + exp
-Rule 2     exp -> exp - exp
-Rule 3     exp -> exp * exp
-Rule 4     exp -> exp / exp
-Rule 5     exp -> exp % exp
-Rule 6     exp -> ( exp )
-Rule 7     exp -> LITERAL_INT
-Rule 8     exp -> LITERAL_REAL
-Rule 9     exp -> - exp
+Rule 0     S' -> program
+Rule 1     program -> head_block decl_block main_block
+Rule 2     head_block -> PROGRAM ID ;
+Rule 3     decl_block -> const_part type_part
+Rule 4     const_part -> CONST const_exp_list
+Rule 5     const_part -> empty
+Rule 6     const_exp_list -> const_exp const_exp_list
+Rule 7     const_exp_list -> const_exp
+Rule 8     const_exp -> ID EQ exp ;
+Rule 9     type_part -> TYPE type_decl_list
+Rule 10    type_part -> empty
+Rule 11    type_decl_list -> type_decl type_decl_list
+Rule 12    type_decl_list -> type_decl
+Rule 13    type_decl -> ID EQ type_def ;
+Rule 14    type_def -> sys_type_def
+Rule 15    type_def -> enum_type_def
+Rule 16    sys_type_def -> INT
+Rule 17    sys_type_def -> REAL
+Rule 18    sys_type_def -> BOOL
+Rule 19    sys_type_def -> CHAR
+Rule 20    sys_type_def -> STRING
+Rule 21    sys_type_def -> ID
+Rule 22    enum_type_def -> ( enum_elem_list )
+Rule 23    enum_elem_list -> enum_elem , enum_elem_list
+Rule 24    enum_elem_list -> enum_elem
+Rule 25    enum_elem -> ID
+Rule 26    main_block -> BEGIN exp END .
+Rule 27    exp -> exp + exp
+Rule 28    exp -> exp - exp
+Rule 29    exp -> exp * exp
+Rule 30    exp -> exp / exp
+Rule 31    exp -> exp % exp
+Rule 32    exp -> ( exp )
+Rule 33    exp -> relat_exp
+Rule 34    exp -> LITERAL_INT
+Rule 35    exp -> LITERAL_REAL
+Rule 36    exp -> LITERAL_BOOL
+Rule 37    exp -> LITERAL_CHAR
+Rule 38    exp -> LITERAL_STRING
+Rule 39    relat_exp -> exp EQ exp
+Rule 40    relat_exp -> exp NEQ exp
+Rule 41    relat_exp -> exp LT exp
+Rule 42    relat_exp -> exp GT exp
+Rule 43    relat_exp -> exp LEQ exp
+Rule 44    relat_exp -> exp GEQ exp
+Rule 45    relat_exp -> exp AND exp
+Rule 46    relat_exp -> exp OR exp
+Rule 47    relat_exp -> NOT exp
+Rule 48    exp -> - exp
+Rule 49    empty -> <empty>
 
 Terminals, with rules where they appear
 
-%                    : 5
-(                    : 6
-)                    : 6
-*                    : 3
-+                    : 1
--                    : 2 9
-/                    : 4
-AND                  : 
+%                    : 31
+(                    : 22 32
+)                    : 22 32
+*                    : 29
++                    : 27
+,                    : 23
+-                    : 28 48
+.                    : 26
+/                    : 30
+;                    : 2 8 13
+AND                  : 45
 ARRAY                : 
 ASSIN                : 
-BEGIN                : 
-BOOL                 : 
+BEGIN                : 26
+BOOL                 : 18
 BREAK                : 
-CAHR                 : 
 CASE                 : 
+CHAR                 : 19
 COMMENT              : 
-CONST                : 
+CONST                : 4
 CONTINUE             : 
 DO                   : 
 ELSE                 : 
-END                  : 
-EQ                   : 
+END                  : 26
+EQ                   : 8 13 39
 EXIT                 : 
 FOR                  : 
 FUNCTION             : 
-GEQ                  : 
+GEQ                  : 44
 GOTO                 : 
-GT                   : 
-ID                   : 
+GT                   : 42
+ID                   : 2 8 13 21 25
 IF                   : 
-INT                  : 
-LEQ                  : 
-LITERAL_CHAR         : 
-LITERAL_INT          : 7
-LITERAL_REAL         : 8
-LITERAL_STRING       : 
-LT                   : 
-NEQ                  : 
-NOT                  : 
+INT                  : 16
+LEQ                  : 43
+LITERAL_BOOL         : 36
+LITERAL_CHAR         : 37
+LITERAL_INT          : 34
+LITERAL_REAL         : 35
+LITERAL_STRING       : 38
+LT                   : 41
+NEQ                  : 40
+NOT                  : 47
 OF                   : 
-OR                   : 
+OR                   : 46
 PROCEDURE            : 
-PROGRAM              : 
+PROGRAM              : 2
 RANGE                : 
-REAL                 : 
+REAL                 : 17
 RECORD               : 
 REPEAT               : 
-STRING               : 
+STRING               : 20
 THEN                 : 
 TO                   : 
-TYPE                 : 
+TYPE                 : 9
 UNTIL                : 
 VAR                  : 
 WHILE                : 
@@ -121,382 +143,2080 @@ error                :
 
 Nonterminals, with rules where they appear
 
-exp                  : 1 1 2 2 3 3 4 4 5 5 6 9 0
+const_exp            : 6 7
+const_exp_list       : 4 6
+const_part           : 3
+decl_block           : 1
+empty                : 5 10
+enum_elem            : 23 24
+enum_elem_list       : 22 23
+enum_type_def        : 15
+exp                  : 8 26 27 27 28 28 29 29 30 30 31 31 32 39 39 40 40 41 41 42 42 43 43 44 44 45 45 46 46 47 48
+head_block           : 1
+main_block           : 1
+program              : 0
+relat_exp            : 33
+sys_type_def         : 14
+type_decl            : 11 12
+type_decl_list       : 9 11
+type_def             : 13
+type_part            : 3
 
 Parsing method: LALR
 
 state 0
 
-    (0) S' -> . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (0) S' -> . program
+    (1) program -> . head_block decl_block main_block
+    (2) head_block -> . PROGRAM ID ;
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    PROGRAM         shift and go to state 3
 
-    exp                            shift and go to state 1
+    program                        shift and go to state 1
+    head_block                     shift and go to state 2
 
 state 1
 
-    (0) S' -> exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (0) S' -> program .
 
-    +               shift and go to state 6
-    -               shift and go to state 7
-    *               shift and go to state 8
-    /               shift and go to state 9
-    %               shift and go to state 10
 
 
 state 2
 
-    (9) exp -> - . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (1) program -> head_block . decl_block main_block
+    (3) decl_block -> . const_part type_part
+    (4) const_part -> . CONST const_exp_list
+    (5) const_part -> . empty
+    (49) empty -> .
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    CONST           shift and go to state 6
+    TYPE            reduce using rule 49 (empty -> .)
+    BEGIN           reduce using rule 49 (empty -> .)
 
-    exp                            shift and go to state 11
+    decl_block                     shift and go to state 4
+    const_part                     shift and go to state 5
+    empty                          shift and go to state 7
 
 state 3
 
-    (6) exp -> ( . exp )
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (2) head_block -> PROGRAM . ID ;
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    ID              shift and go to state 8
 
-    exp                            shift and go to state 12
 
 state 4
 
-    (7) exp -> LITERAL_INT .
+    (1) program -> head_block decl_block . main_block
+    (26) main_block -> . BEGIN exp END .
 
-    +               reduce using rule 7 (exp -> LITERAL_INT .)
-    -               reduce using rule 7 (exp -> LITERAL_INT .)
-    *               reduce using rule 7 (exp -> LITERAL_INT .)
-    /               reduce using rule 7 (exp -> LITERAL_INT .)
-    %               reduce using rule 7 (exp -> LITERAL_INT .)
-    $end            reduce using rule 7 (exp -> LITERAL_INT .)
-    )               reduce using rule 7 (exp -> LITERAL_INT .)
+    BEGIN           shift and go to state 10
 
+    main_block                     shift and go to state 9
 
 state 5
 
-    (8) exp -> LITERAL_REAL .
+    (3) decl_block -> const_part . type_part
+    (9) type_part -> . TYPE type_decl_list
+    (10) type_part -> . empty
+    (49) empty -> .
 
-    +               reduce using rule 8 (exp -> LITERAL_REAL .)
-    -               reduce using rule 8 (exp -> LITERAL_REAL .)
-    *               reduce using rule 8 (exp -> LITERAL_REAL .)
-    /               reduce using rule 8 (exp -> LITERAL_REAL .)
-    %               reduce using rule 8 (exp -> LITERAL_REAL .)
-    $end            reduce using rule 8 (exp -> LITERAL_REAL .)
-    )               reduce using rule 8 (exp -> LITERAL_REAL .)
+    TYPE            shift and go to state 12
+    BEGIN           reduce using rule 49 (empty -> .)
 
+    type_part                      shift and go to state 11
+    empty                          shift and go to state 13
 
 state 6
 
-    (1) exp -> exp + . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (4) const_part -> CONST . const_exp_list
+    (6) const_exp_list -> . const_exp const_exp_list
+    (7) const_exp_list -> . const_exp
+    (8) const_exp -> . ID EQ exp ;
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    ID              shift and go to state 16
 
-    exp                            shift and go to state 13
+    const_exp_list                 shift and go to state 14
+    const_exp                      shift and go to state 15
 
 state 7
 
-    (2) exp -> exp - . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (5) const_part -> empty .
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    TYPE            reduce using rule 5 (const_part -> empty .)
+    BEGIN           reduce using rule 5 (const_part -> empty .)
 
-    exp                            shift and go to state 14
 
 state 8
 
-    (3) exp -> exp * . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (2) head_block -> PROGRAM ID . ;
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    ;               shift and go to state 17
 
-    exp                            shift and go to state 15
 
 state 9
 
-    (4) exp -> exp / . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (1) program -> head_block decl_block main_block .
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    $end            reduce using rule 1 (program -> head_block decl_block main_block .)
 
-    exp                            shift and go to state 16
 
 state 10
 
-    (5) exp -> exp % . exp
-    (1) exp -> . exp + exp
-    (2) exp -> . exp - exp
-    (3) exp -> . exp * exp
-    (4) exp -> . exp / exp
-    (5) exp -> . exp % exp
-    (6) exp -> . ( exp )
-    (7) exp -> . LITERAL_INT
-    (8) exp -> . LITERAL_REAL
-    (9) exp -> . - exp
+    (26) main_block -> BEGIN . exp END .
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
 
-    (               shift and go to state 3
-    LITERAL_INT     shift and go to state 4
-    LITERAL_REAL    shift and go to state 5
-    -               shift and go to state 2
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
 
-    exp                            shift and go to state 17
+    exp                            shift and go to state 18
+    relat_exp                      shift and go to state 21
 
 state 11
 
-    (9) exp -> - exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (3) decl_block -> const_part type_part .
 
-    +               reduce using rule 9 (exp -> - exp .)
-    -               reduce using rule 9 (exp -> - exp .)
-    *               reduce using rule 9 (exp -> - exp .)
-    /               reduce using rule 9 (exp -> - exp .)
-    %               reduce using rule 9 (exp -> - exp .)
-    $end            reduce using rule 9 (exp -> - exp .)
-    )               reduce using rule 9 (exp -> - exp .)
-
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
-  ! *               [ shift and go to state 8 ]
-  ! /               [ shift and go to state 9 ]
-  ! %               [ shift and go to state 10 ]
+    BEGIN           reduce using rule 3 (decl_block -> const_part type_part .)
 
 
 state 12
 
-    (6) exp -> ( exp . )
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (9) type_part -> TYPE . type_decl_list
+    (11) type_decl_list -> . type_decl type_decl_list
+    (12) type_decl_list -> . type_decl
+    (13) type_decl -> . ID EQ type_def ;
 
-    )               shift and go to state 18
-    +               shift and go to state 6
-    -               shift and go to state 7
-    *               shift and go to state 8
-    /               shift and go to state 9
-    %               shift and go to state 10
+    ID              shift and go to state 30
 
+    type_decl_list                 shift and go to state 28
+    type_decl                      shift and go to state 29
 
 state 13
 
-    (1) exp -> exp + exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (10) type_part -> empty .
 
-    +               reduce using rule 1 (exp -> exp + exp .)
-    -               reduce using rule 1 (exp -> exp + exp .)
-    $end            reduce using rule 1 (exp -> exp + exp .)
-    )               reduce using rule 1 (exp -> exp + exp .)
-    *               shift and go to state 8
-    /               shift and go to state 9
-    %               shift and go to state 10
-
-  ! *               [ reduce using rule 1 (exp -> exp + exp .) ]
-  ! /               [ reduce using rule 1 (exp -> exp + exp .) ]
-  ! %               [ reduce using rule 1 (exp -> exp + exp .) ]
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
+    BEGIN           reduce using rule 10 (type_part -> empty .)
 
 
 state 14
 
-    (2) exp -> exp - exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (4) const_part -> CONST const_exp_list .
 
-    +               reduce using rule 2 (exp -> exp - exp .)
-    -               reduce using rule 2 (exp -> exp - exp .)
-    $end            reduce using rule 2 (exp -> exp - exp .)
-    )               reduce using rule 2 (exp -> exp - exp .)
-    *               shift and go to state 8
-    /               shift and go to state 9
-    %               shift and go to state 10
-
-  ! *               [ reduce using rule 2 (exp -> exp - exp .) ]
-  ! /               [ reduce using rule 2 (exp -> exp - exp .) ]
-  ! %               [ reduce using rule 2 (exp -> exp - exp .) ]
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
+    TYPE            reduce using rule 4 (const_part -> CONST const_exp_list .)
+    BEGIN           reduce using rule 4 (const_part -> CONST const_exp_list .)
 
 
 state 15
 
-    (3) exp -> exp * exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (6) const_exp_list -> const_exp . const_exp_list
+    (7) const_exp_list -> const_exp .
+    (6) const_exp_list -> . const_exp const_exp_list
+    (7) const_exp_list -> . const_exp
+    (8) const_exp -> . ID EQ exp ;
 
-    +               reduce using rule 3 (exp -> exp * exp .)
-    -               reduce using rule 3 (exp -> exp * exp .)
-    *               reduce using rule 3 (exp -> exp * exp .)
-    /               reduce using rule 3 (exp -> exp * exp .)
-    %               reduce using rule 3 (exp -> exp * exp .)
-    $end            reduce using rule 3 (exp -> exp * exp .)
-    )               reduce using rule 3 (exp -> exp * exp .)
+    TYPE            reduce using rule 7 (const_exp_list -> const_exp .)
+    BEGIN           reduce using rule 7 (const_exp_list -> const_exp .)
+    ID              shift and go to state 16
 
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
-  ! *               [ shift and go to state 8 ]
-  ! /               [ shift and go to state 9 ]
-  ! %               [ shift and go to state 10 ]
-
+    const_exp                      shift and go to state 15
+    const_exp_list                 shift and go to state 31
 
 state 16
 
-    (4) exp -> exp / exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (8) const_exp -> ID . EQ exp ;
 
-    +               reduce using rule 4 (exp -> exp / exp .)
-    -               reduce using rule 4 (exp -> exp / exp .)
-    *               reduce using rule 4 (exp -> exp / exp .)
-    /               reduce using rule 4 (exp -> exp / exp .)
-    %               reduce using rule 4 (exp -> exp / exp .)
-    $end            reduce using rule 4 (exp -> exp / exp .)
-    )               reduce using rule 4 (exp -> exp / exp .)
-
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
-  ! *               [ shift and go to state 8 ]
-  ! /               [ shift and go to state 9 ]
-  ! %               [ shift and go to state 10 ]
+    EQ              shift and go to state 32
 
 
 state 17
 
-    (5) exp -> exp % exp .
-    (1) exp -> exp . + exp
-    (2) exp -> exp . - exp
-    (3) exp -> exp . * exp
-    (4) exp -> exp . / exp
-    (5) exp -> exp . % exp
+    (2) head_block -> PROGRAM ID ; .
 
-    +               reduce using rule 5 (exp -> exp % exp .)
-    -               reduce using rule 5 (exp -> exp % exp .)
-    *               reduce using rule 5 (exp -> exp % exp .)
-    /               reduce using rule 5 (exp -> exp % exp .)
-    %               reduce using rule 5 (exp -> exp % exp .)
-    $end            reduce using rule 5 (exp -> exp % exp .)
-    )               reduce using rule 5 (exp -> exp % exp .)
-
-  ! +               [ shift and go to state 6 ]
-  ! -               [ shift and go to state 7 ]
-  ! *               [ shift and go to state 8 ]
-  ! /               [ shift and go to state 9 ]
-  ! %               [ shift and go to state 10 ]
+    CONST           reduce using rule 2 (head_block -> PROGRAM ID ; .)
+    BEGIN           reduce using rule 2 (head_block -> PROGRAM ID ; .)
+    TYPE            reduce using rule 2 (head_block -> PROGRAM ID ; .)
 
 
 state 18
 
-    (6) exp -> ( exp ) .
+    (26) main_block -> BEGIN exp . END .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
 
-    +               reduce using rule 6 (exp -> ( exp ) .)
-    -               reduce using rule 6 (exp -> ( exp ) .)
-    *               reduce using rule 6 (exp -> ( exp ) .)
-    /               reduce using rule 6 (exp -> ( exp ) .)
-    %               reduce using rule 6 (exp -> ( exp ) .)
-    $end            reduce using rule 6 (exp -> ( exp ) .)
-    )               reduce using rule 6 (exp -> ( exp ) .)
+    END             shift and go to state 33
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    EQ              shift and go to state 39
+    NEQ             shift and go to state 40
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+    AND             shift and go to state 45
+    OR              shift and go to state 46
+
+
+state 19
+
+    (48) exp -> - . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 47
+    relat_exp                      shift and go to state 21
+
+state 20
+
+    (32) exp -> ( . exp )
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 48
+    relat_exp                      shift and go to state 21
+
+state 21
+
+    (33) exp -> relat_exp .
+
+    END             reduce using rule 33 (exp -> relat_exp .)
+    +               reduce using rule 33 (exp -> relat_exp .)
+    -               reduce using rule 33 (exp -> relat_exp .)
+    *               reduce using rule 33 (exp -> relat_exp .)
+    /               reduce using rule 33 (exp -> relat_exp .)
+    %               reduce using rule 33 (exp -> relat_exp .)
+    EQ              reduce using rule 33 (exp -> relat_exp .)
+    NEQ             reduce using rule 33 (exp -> relat_exp .)
+    LT              reduce using rule 33 (exp -> relat_exp .)
+    GT              reduce using rule 33 (exp -> relat_exp .)
+    LEQ             reduce using rule 33 (exp -> relat_exp .)
+    GEQ             reduce using rule 33 (exp -> relat_exp .)
+    AND             reduce using rule 33 (exp -> relat_exp .)
+    OR              reduce using rule 33 (exp -> relat_exp .)
+    )               reduce using rule 33 (exp -> relat_exp .)
+    ;               reduce using rule 33 (exp -> relat_exp .)
+
+
+state 22
+
+    (34) exp -> LITERAL_INT .
+
+    END             reduce using rule 34 (exp -> LITERAL_INT .)
+    +               reduce using rule 34 (exp -> LITERAL_INT .)
+    -               reduce using rule 34 (exp -> LITERAL_INT .)
+    *               reduce using rule 34 (exp -> LITERAL_INT .)
+    /               reduce using rule 34 (exp -> LITERAL_INT .)
+    %               reduce using rule 34 (exp -> LITERAL_INT .)
+    EQ              reduce using rule 34 (exp -> LITERAL_INT .)
+    NEQ             reduce using rule 34 (exp -> LITERAL_INT .)
+    LT              reduce using rule 34 (exp -> LITERAL_INT .)
+    GT              reduce using rule 34 (exp -> LITERAL_INT .)
+    LEQ             reduce using rule 34 (exp -> LITERAL_INT .)
+    GEQ             reduce using rule 34 (exp -> LITERAL_INT .)
+    AND             reduce using rule 34 (exp -> LITERAL_INT .)
+    OR              reduce using rule 34 (exp -> LITERAL_INT .)
+    )               reduce using rule 34 (exp -> LITERAL_INT .)
+    ;               reduce using rule 34 (exp -> LITERAL_INT .)
+
+
+state 23
+
+    (35) exp -> LITERAL_REAL .
+
+    END             reduce using rule 35 (exp -> LITERAL_REAL .)
+    +               reduce using rule 35 (exp -> LITERAL_REAL .)
+    -               reduce using rule 35 (exp -> LITERAL_REAL .)
+    *               reduce using rule 35 (exp -> LITERAL_REAL .)
+    /               reduce using rule 35 (exp -> LITERAL_REAL .)
+    %               reduce using rule 35 (exp -> LITERAL_REAL .)
+    EQ              reduce using rule 35 (exp -> LITERAL_REAL .)
+    NEQ             reduce using rule 35 (exp -> LITERAL_REAL .)
+    LT              reduce using rule 35 (exp -> LITERAL_REAL .)
+    GT              reduce using rule 35 (exp -> LITERAL_REAL .)
+    LEQ             reduce using rule 35 (exp -> LITERAL_REAL .)
+    GEQ             reduce using rule 35 (exp -> LITERAL_REAL .)
+    AND             reduce using rule 35 (exp -> LITERAL_REAL .)
+    OR              reduce using rule 35 (exp -> LITERAL_REAL .)
+    )               reduce using rule 35 (exp -> LITERAL_REAL .)
+    ;               reduce using rule 35 (exp -> LITERAL_REAL .)
+
+
+state 24
+
+    (36) exp -> LITERAL_BOOL .
+
+    END             reduce using rule 36 (exp -> LITERAL_BOOL .)
+    +               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    -               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    *               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    /               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    %               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    EQ              reduce using rule 36 (exp -> LITERAL_BOOL .)
+    NEQ             reduce using rule 36 (exp -> LITERAL_BOOL .)
+    LT              reduce using rule 36 (exp -> LITERAL_BOOL .)
+    GT              reduce using rule 36 (exp -> LITERAL_BOOL .)
+    LEQ             reduce using rule 36 (exp -> LITERAL_BOOL .)
+    GEQ             reduce using rule 36 (exp -> LITERAL_BOOL .)
+    AND             reduce using rule 36 (exp -> LITERAL_BOOL .)
+    OR              reduce using rule 36 (exp -> LITERAL_BOOL .)
+    )               reduce using rule 36 (exp -> LITERAL_BOOL .)
+    ;               reduce using rule 36 (exp -> LITERAL_BOOL .)
+
+
+state 25
+
+    (37) exp -> LITERAL_CHAR .
+
+    END             reduce using rule 37 (exp -> LITERAL_CHAR .)
+    +               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    -               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    *               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    /               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    %               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    EQ              reduce using rule 37 (exp -> LITERAL_CHAR .)
+    NEQ             reduce using rule 37 (exp -> LITERAL_CHAR .)
+    LT              reduce using rule 37 (exp -> LITERAL_CHAR .)
+    GT              reduce using rule 37 (exp -> LITERAL_CHAR .)
+    LEQ             reduce using rule 37 (exp -> LITERAL_CHAR .)
+    GEQ             reduce using rule 37 (exp -> LITERAL_CHAR .)
+    AND             reduce using rule 37 (exp -> LITERAL_CHAR .)
+    OR              reduce using rule 37 (exp -> LITERAL_CHAR .)
+    )               reduce using rule 37 (exp -> LITERAL_CHAR .)
+    ;               reduce using rule 37 (exp -> LITERAL_CHAR .)
+
+
+state 26
+
+    (38) exp -> LITERAL_STRING .
+
+    END             reduce using rule 38 (exp -> LITERAL_STRING .)
+    +               reduce using rule 38 (exp -> LITERAL_STRING .)
+    -               reduce using rule 38 (exp -> LITERAL_STRING .)
+    *               reduce using rule 38 (exp -> LITERAL_STRING .)
+    /               reduce using rule 38 (exp -> LITERAL_STRING .)
+    %               reduce using rule 38 (exp -> LITERAL_STRING .)
+    EQ              reduce using rule 38 (exp -> LITERAL_STRING .)
+    NEQ             reduce using rule 38 (exp -> LITERAL_STRING .)
+    LT              reduce using rule 38 (exp -> LITERAL_STRING .)
+    GT              reduce using rule 38 (exp -> LITERAL_STRING .)
+    LEQ             reduce using rule 38 (exp -> LITERAL_STRING .)
+    GEQ             reduce using rule 38 (exp -> LITERAL_STRING .)
+    AND             reduce using rule 38 (exp -> LITERAL_STRING .)
+    OR              reduce using rule 38 (exp -> LITERAL_STRING .)
+    )               reduce using rule 38 (exp -> LITERAL_STRING .)
+    ;               reduce using rule 38 (exp -> LITERAL_STRING .)
+
+
+state 27
+
+    (47) relat_exp -> NOT . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 49
+    relat_exp                      shift and go to state 21
+
+state 28
+
+    (9) type_part -> TYPE type_decl_list .
+
+    BEGIN           reduce using rule 9 (type_part -> TYPE type_decl_list .)
+
+
+state 29
+
+    (11) type_decl_list -> type_decl . type_decl_list
+    (12) type_decl_list -> type_decl .
+    (11) type_decl_list -> . type_decl type_decl_list
+    (12) type_decl_list -> . type_decl
+    (13) type_decl -> . ID EQ type_def ;
+
+    BEGIN           reduce using rule 12 (type_decl_list -> type_decl .)
+    ID              shift and go to state 30
+
+    type_decl                      shift and go to state 29
+    type_decl_list                 shift and go to state 50
+
+state 30
+
+    (13) type_decl -> ID . EQ type_def ;
+
+    EQ              shift and go to state 51
+
+
+state 31
+
+    (6) const_exp_list -> const_exp const_exp_list .
+
+    TYPE            reduce using rule 6 (const_exp_list -> const_exp const_exp_list .)
+    BEGIN           reduce using rule 6 (const_exp_list -> const_exp const_exp_list .)
+
+
+state 32
+
+    (8) const_exp -> ID EQ . exp ;
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 52
+    relat_exp                      shift and go to state 21
+
+state 33
+
+    (26) main_block -> BEGIN exp END . .
+
+    .               shift and go to state 53
+
+
+state 34
+
+    (27) exp -> exp + . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 54
+    relat_exp                      shift and go to state 21
+
+state 35
+
+    (28) exp -> exp - . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 55
+    relat_exp                      shift and go to state 21
+
+state 36
+
+    (29) exp -> exp * . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 56
+    relat_exp                      shift and go to state 21
+
+state 37
+
+    (30) exp -> exp / . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 57
+    relat_exp                      shift and go to state 21
+
+state 38
+
+    (31) exp -> exp % . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 58
+    relat_exp                      shift and go to state 21
+
+state 39
+
+    (39) relat_exp -> exp EQ . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 59
+    relat_exp                      shift and go to state 21
+
+state 40
+
+    (40) relat_exp -> exp NEQ . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 60
+    relat_exp                      shift and go to state 21
+
+state 41
+
+    (41) relat_exp -> exp LT . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 61
+    relat_exp                      shift and go to state 21
+
+state 42
+
+    (42) relat_exp -> exp GT . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 62
+    relat_exp                      shift and go to state 21
+
+state 43
+
+    (43) relat_exp -> exp LEQ . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 63
+    relat_exp                      shift and go to state 21
+
+state 44
+
+    (44) relat_exp -> exp GEQ . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 64
+    relat_exp                      shift and go to state 21
+
+state 45
+
+    (45) relat_exp -> exp AND . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 65
+    relat_exp                      shift and go to state 21
+
+state 46
+
+    (46) relat_exp -> exp OR . exp
+    (27) exp -> . exp + exp
+    (28) exp -> . exp - exp
+    (29) exp -> . exp * exp
+    (30) exp -> . exp / exp
+    (31) exp -> . exp % exp
+    (32) exp -> . ( exp )
+    (33) exp -> . relat_exp
+    (34) exp -> . LITERAL_INT
+    (35) exp -> . LITERAL_REAL
+    (36) exp -> . LITERAL_BOOL
+    (37) exp -> . LITERAL_CHAR
+    (38) exp -> . LITERAL_STRING
+    (48) exp -> . - exp
+    (39) relat_exp -> . exp EQ exp
+    (40) relat_exp -> . exp NEQ exp
+    (41) relat_exp -> . exp LT exp
+    (42) relat_exp -> . exp GT exp
+    (43) relat_exp -> . exp LEQ exp
+    (44) relat_exp -> . exp GEQ exp
+    (45) relat_exp -> . exp AND exp
+    (46) relat_exp -> . exp OR exp
+    (47) relat_exp -> . NOT exp
+
+    (               shift and go to state 20
+    LITERAL_INT     shift and go to state 22
+    LITERAL_REAL    shift and go to state 23
+    LITERAL_BOOL    shift and go to state 24
+    LITERAL_CHAR    shift and go to state 25
+    LITERAL_STRING  shift and go to state 26
+    -               shift and go to state 19
+    NOT             shift and go to state 27
+
+    exp                            shift and go to state 66
+    relat_exp                      shift and go to state 21
+
+state 47
+
+    (48) exp -> - exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 48 (exp -> - exp .)
+    +               reduce using rule 48 (exp -> - exp .)
+    -               reduce using rule 48 (exp -> - exp .)
+    *               reduce using rule 48 (exp -> - exp .)
+    /               reduce using rule 48 (exp -> - exp .)
+    %               reduce using rule 48 (exp -> - exp .)
+    EQ              reduce using rule 48 (exp -> - exp .)
+    NEQ             reduce using rule 48 (exp -> - exp .)
+    LT              reduce using rule 48 (exp -> - exp .)
+    GT              reduce using rule 48 (exp -> - exp .)
+    LEQ             reduce using rule 48 (exp -> - exp .)
+    GEQ             reduce using rule 48 (exp -> - exp .)
+    AND             reduce using rule 48 (exp -> - exp .)
+    OR              reduce using rule 48 (exp -> - exp .)
+    )               reduce using rule 48 (exp -> - exp .)
+    ;               reduce using rule 48 (exp -> - exp .)
+
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! *               [ shift and go to state 36 ]
+  ! /               [ shift and go to state 37 ]
+  ! %               [ shift and go to state 38 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 48
+
+    (32) exp -> ( exp . )
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    )               shift and go to state 67
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    EQ              shift and go to state 39
+    NEQ             shift and go to state 40
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+    AND             shift and go to state 45
+    OR              shift and go to state 46
+
+
+state 49
+
+    (47) relat_exp -> NOT exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 47 (relat_exp -> NOT exp .)
+    +               reduce using rule 47 (relat_exp -> NOT exp .)
+    -               reduce using rule 47 (relat_exp -> NOT exp .)
+    *               reduce using rule 47 (relat_exp -> NOT exp .)
+    /               reduce using rule 47 (relat_exp -> NOT exp .)
+    %               reduce using rule 47 (relat_exp -> NOT exp .)
+    EQ              reduce using rule 47 (relat_exp -> NOT exp .)
+    NEQ             reduce using rule 47 (relat_exp -> NOT exp .)
+    LT              reduce using rule 47 (relat_exp -> NOT exp .)
+    GT              reduce using rule 47 (relat_exp -> NOT exp .)
+    LEQ             reduce using rule 47 (relat_exp -> NOT exp .)
+    GEQ             reduce using rule 47 (relat_exp -> NOT exp .)
+    AND             reduce using rule 47 (relat_exp -> NOT exp .)
+    OR              reduce using rule 47 (relat_exp -> NOT exp .)
+    )               reduce using rule 47 (relat_exp -> NOT exp .)
+    ;               reduce using rule 47 (relat_exp -> NOT exp .)
+
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! *               [ shift and go to state 36 ]
+  ! /               [ shift and go to state 37 ]
+  ! %               [ shift and go to state 38 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 50
+
+    (11) type_decl_list -> type_decl type_decl_list .
+
+    BEGIN           reduce using rule 11 (type_decl_list -> type_decl type_decl_list .)
+
+
+state 51
+
+    (13) type_decl -> ID EQ . type_def ;
+    (14) type_def -> . sys_type_def
+    (15) type_def -> . enum_type_def
+    (16) sys_type_def -> . INT
+    (17) sys_type_def -> . REAL
+    (18) sys_type_def -> . BOOL
+    (19) sys_type_def -> . CHAR
+    (20) sys_type_def -> . STRING
+    (21) sys_type_def -> . ID
+    (22) enum_type_def -> . ( enum_elem_list )
+
+    INT             shift and go to state 72
+    REAL            shift and go to state 73
+    BOOL            shift and go to state 74
+    CHAR            shift and go to state 75
+    STRING          shift and go to state 76
+    ID              shift and go to state 68
+    (               shift and go to state 77
+
+    type_def                       shift and go to state 69
+    sys_type_def                   shift and go to state 70
+    enum_type_def                  shift and go to state 71
+
+state 52
+
+    (8) const_exp -> ID EQ exp . ;
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    ;               shift and go to state 78
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    EQ              shift and go to state 39
+    NEQ             shift and go to state 40
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+    AND             shift and go to state 45
+    OR              shift and go to state 46
+
+
+state 53
+
+    (26) main_block -> BEGIN exp END . .
+
+    $end            reduce using rule 26 (main_block -> BEGIN exp END . .)
+
+
+state 54
+
+    (27) exp -> exp + exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 27 (exp -> exp + exp .)
+    +               reduce using rule 27 (exp -> exp + exp .)
+    -               reduce using rule 27 (exp -> exp + exp .)
+    EQ              reduce using rule 27 (exp -> exp + exp .)
+    NEQ             reduce using rule 27 (exp -> exp + exp .)
+    LT              reduce using rule 27 (exp -> exp + exp .)
+    GT              reduce using rule 27 (exp -> exp + exp .)
+    LEQ             reduce using rule 27 (exp -> exp + exp .)
+    GEQ             reduce using rule 27 (exp -> exp + exp .)
+    AND             reduce using rule 27 (exp -> exp + exp .)
+    OR              reduce using rule 27 (exp -> exp + exp .)
+    )               reduce using rule 27 (exp -> exp + exp .)
+    ;               reduce using rule 27 (exp -> exp + exp .)
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! *               [ reduce using rule 27 (exp -> exp + exp .) ]
+  ! /               [ reduce using rule 27 (exp -> exp + exp .) ]
+  ! %               [ reduce using rule 27 (exp -> exp + exp .) ]
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 55
+
+    (28) exp -> exp - exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 28 (exp -> exp - exp .)
+    +               reduce using rule 28 (exp -> exp - exp .)
+    -               reduce using rule 28 (exp -> exp - exp .)
+    EQ              reduce using rule 28 (exp -> exp - exp .)
+    NEQ             reduce using rule 28 (exp -> exp - exp .)
+    LT              reduce using rule 28 (exp -> exp - exp .)
+    GT              reduce using rule 28 (exp -> exp - exp .)
+    LEQ             reduce using rule 28 (exp -> exp - exp .)
+    GEQ             reduce using rule 28 (exp -> exp - exp .)
+    AND             reduce using rule 28 (exp -> exp - exp .)
+    OR              reduce using rule 28 (exp -> exp - exp .)
+    )               reduce using rule 28 (exp -> exp - exp .)
+    ;               reduce using rule 28 (exp -> exp - exp .)
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! *               [ reduce using rule 28 (exp -> exp - exp .) ]
+  ! /               [ reduce using rule 28 (exp -> exp - exp .) ]
+  ! %               [ reduce using rule 28 (exp -> exp - exp .) ]
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 56
+
+    (29) exp -> exp * exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 29 (exp -> exp * exp .)
+    +               reduce using rule 29 (exp -> exp * exp .)
+    -               reduce using rule 29 (exp -> exp * exp .)
+    *               reduce using rule 29 (exp -> exp * exp .)
+    /               reduce using rule 29 (exp -> exp * exp .)
+    %               reduce using rule 29 (exp -> exp * exp .)
+    EQ              reduce using rule 29 (exp -> exp * exp .)
+    NEQ             reduce using rule 29 (exp -> exp * exp .)
+    LT              reduce using rule 29 (exp -> exp * exp .)
+    GT              reduce using rule 29 (exp -> exp * exp .)
+    LEQ             reduce using rule 29 (exp -> exp * exp .)
+    GEQ             reduce using rule 29 (exp -> exp * exp .)
+    AND             reduce using rule 29 (exp -> exp * exp .)
+    OR              reduce using rule 29 (exp -> exp * exp .)
+    )               reduce using rule 29 (exp -> exp * exp .)
+    ;               reduce using rule 29 (exp -> exp * exp .)
+
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! *               [ shift and go to state 36 ]
+  ! /               [ shift and go to state 37 ]
+  ! %               [ shift and go to state 38 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 57
+
+    (30) exp -> exp / exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 30 (exp -> exp / exp .)
+    +               reduce using rule 30 (exp -> exp / exp .)
+    -               reduce using rule 30 (exp -> exp / exp .)
+    *               reduce using rule 30 (exp -> exp / exp .)
+    /               reduce using rule 30 (exp -> exp / exp .)
+    %               reduce using rule 30 (exp -> exp / exp .)
+    EQ              reduce using rule 30 (exp -> exp / exp .)
+    NEQ             reduce using rule 30 (exp -> exp / exp .)
+    LT              reduce using rule 30 (exp -> exp / exp .)
+    GT              reduce using rule 30 (exp -> exp / exp .)
+    LEQ             reduce using rule 30 (exp -> exp / exp .)
+    GEQ             reduce using rule 30 (exp -> exp / exp .)
+    AND             reduce using rule 30 (exp -> exp / exp .)
+    OR              reduce using rule 30 (exp -> exp / exp .)
+    )               reduce using rule 30 (exp -> exp / exp .)
+    ;               reduce using rule 30 (exp -> exp / exp .)
+
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! *               [ shift and go to state 36 ]
+  ! /               [ shift and go to state 37 ]
+  ! %               [ shift and go to state 38 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 58
+
+    (31) exp -> exp % exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 31 (exp -> exp % exp .)
+    +               reduce using rule 31 (exp -> exp % exp .)
+    -               reduce using rule 31 (exp -> exp % exp .)
+    *               reduce using rule 31 (exp -> exp % exp .)
+    /               reduce using rule 31 (exp -> exp % exp .)
+    %               reduce using rule 31 (exp -> exp % exp .)
+    EQ              reduce using rule 31 (exp -> exp % exp .)
+    NEQ             reduce using rule 31 (exp -> exp % exp .)
+    LT              reduce using rule 31 (exp -> exp % exp .)
+    GT              reduce using rule 31 (exp -> exp % exp .)
+    LEQ             reduce using rule 31 (exp -> exp % exp .)
+    GEQ             reduce using rule 31 (exp -> exp % exp .)
+    AND             reduce using rule 31 (exp -> exp % exp .)
+    OR              reduce using rule 31 (exp -> exp % exp .)
+    )               reduce using rule 31 (exp -> exp % exp .)
+    ;               reduce using rule 31 (exp -> exp % exp .)
+
+  ! +               [ shift and go to state 34 ]
+  ! -               [ shift and go to state 35 ]
+  ! *               [ shift and go to state 36 ]
+  ! /               [ shift and go to state 37 ]
+  ! %               [ shift and go to state 38 ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 59
+
+    (39) relat_exp -> exp EQ exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 39 (relat_exp -> exp EQ exp .)
+    EQ              reduce using rule 39 (relat_exp -> exp EQ exp .)
+    NEQ             reduce using rule 39 (relat_exp -> exp EQ exp .)
+    AND             reduce using rule 39 (relat_exp -> exp EQ exp .)
+    OR              reduce using rule 39 (relat_exp -> exp EQ exp .)
+    )               reduce using rule 39 (relat_exp -> exp EQ exp .)
+    ;               reduce using rule 39 (relat_exp -> exp EQ exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+
+  ! +               [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! -               [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! *               [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! /               [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! %               [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! LT              [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! GT              [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! LEQ             [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! GEQ             [ reduce using rule 39 (relat_exp -> exp EQ exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 60
+
+    (40) relat_exp -> exp NEQ exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    EQ              reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    NEQ             reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    AND             reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    OR              reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    )               reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    ;               reduce using rule 40 (relat_exp -> exp NEQ exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+
+  ! +               [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! -               [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! *               [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! /               [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! %               [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! LT              [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! GT              [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! LEQ             [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! GEQ             [ reduce using rule 40 (relat_exp -> exp NEQ exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 61
+
+    (41) relat_exp -> exp LT exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 41 (relat_exp -> exp LT exp .)
+    EQ              reduce using rule 41 (relat_exp -> exp LT exp .)
+    NEQ             reduce using rule 41 (relat_exp -> exp LT exp .)
+    LT              reduce using rule 41 (relat_exp -> exp LT exp .)
+    GT              reduce using rule 41 (relat_exp -> exp LT exp .)
+    LEQ             reduce using rule 41 (relat_exp -> exp LT exp .)
+    GEQ             reduce using rule 41 (relat_exp -> exp LT exp .)
+    AND             reduce using rule 41 (relat_exp -> exp LT exp .)
+    OR              reduce using rule 41 (relat_exp -> exp LT exp .)
+    )               reduce using rule 41 (relat_exp -> exp LT exp .)
+    ;               reduce using rule 41 (relat_exp -> exp LT exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! +               [ reduce using rule 41 (relat_exp -> exp LT exp .) ]
+  ! -               [ reduce using rule 41 (relat_exp -> exp LT exp .) ]
+  ! *               [ reduce using rule 41 (relat_exp -> exp LT exp .) ]
+  ! /               [ reduce using rule 41 (relat_exp -> exp LT exp .) ]
+  ! %               [ reduce using rule 41 (relat_exp -> exp LT exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 62
+
+    (42) relat_exp -> exp GT exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 42 (relat_exp -> exp GT exp .)
+    EQ              reduce using rule 42 (relat_exp -> exp GT exp .)
+    NEQ             reduce using rule 42 (relat_exp -> exp GT exp .)
+    LT              reduce using rule 42 (relat_exp -> exp GT exp .)
+    GT              reduce using rule 42 (relat_exp -> exp GT exp .)
+    LEQ             reduce using rule 42 (relat_exp -> exp GT exp .)
+    GEQ             reduce using rule 42 (relat_exp -> exp GT exp .)
+    AND             reduce using rule 42 (relat_exp -> exp GT exp .)
+    OR              reduce using rule 42 (relat_exp -> exp GT exp .)
+    )               reduce using rule 42 (relat_exp -> exp GT exp .)
+    ;               reduce using rule 42 (relat_exp -> exp GT exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! +               [ reduce using rule 42 (relat_exp -> exp GT exp .) ]
+  ! -               [ reduce using rule 42 (relat_exp -> exp GT exp .) ]
+  ! *               [ reduce using rule 42 (relat_exp -> exp GT exp .) ]
+  ! /               [ reduce using rule 42 (relat_exp -> exp GT exp .) ]
+  ! %               [ reduce using rule 42 (relat_exp -> exp GT exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 63
+
+    (43) relat_exp -> exp LEQ exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    EQ              reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    NEQ             reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    LT              reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    GT              reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    LEQ             reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    GEQ             reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    AND             reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    OR              reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    )               reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    ;               reduce using rule 43 (relat_exp -> exp LEQ exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! +               [ reduce using rule 43 (relat_exp -> exp LEQ exp .) ]
+  ! -               [ reduce using rule 43 (relat_exp -> exp LEQ exp .) ]
+  ! *               [ reduce using rule 43 (relat_exp -> exp LEQ exp .) ]
+  ! /               [ reduce using rule 43 (relat_exp -> exp LEQ exp .) ]
+  ! %               [ reduce using rule 43 (relat_exp -> exp LEQ exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 64
+
+    (44) relat_exp -> exp GEQ exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    EQ              reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    NEQ             reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    LT              reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    GT              reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    LEQ             reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    GEQ             reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    AND             reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    OR              reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    )               reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    ;               reduce using rule 44 (relat_exp -> exp GEQ exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+
+  ! +               [ reduce using rule 44 (relat_exp -> exp GEQ exp .) ]
+  ! -               [ reduce using rule 44 (relat_exp -> exp GEQ exp .) ]
+  ! *               [ reduce using rule 44 (relat_exp -> exp GEQ exp .) ]
+  ! /               [ reduce using rule 44 (relat_exp -> exp GEQ exp .) ]
+  ! %               [ reduce using rule 44 (relat_exp -> exp GEQ exp .) ]
+  ! EQ              [ shift and go to state 39 ]
+  ! NEQ             [ shift and go to state 40 ]
+  ! LT              [ shift and go to state 41 ]
+  ! GT              [ shift and go to state 42 ]
+  ! LEQ             [ shift and go to state 43 ]
+  ! GEQ             [ shift and go to state 44 ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 65
+
+    (45) relat_exp -> exp AND exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 45 (relat_exp -> exp AND exp .)
+    AND             reduce using rule 45 (relat_exp -> exp AND exp .)
+    OR              reduce using rule 45 (relat_exp -> exp AND exp .)
+    )               reduce using rule 45 (relat_exp -> exp AND exp .)
+    ;               reduce using rule 45 (relat_exp -> exp AND exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    EQ              shift and go to state 39
+    NEQ             shift and go to state 40
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+
+  ! +               [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! -               [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! *               [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! /               [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! %               [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! EQ              [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! NEQ             [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! LT              [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! GT              [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! LEQ             [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! GEQ             [ reduce using rule 45 (relat_exp -> exp AND exp .) ]
+  ! AND             [ shift and go to state 45 ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 66
+
+    (46) relat_exp -> exp OR exp .
+    (27) exp -> exp . + exp
+    (28) exp -> exp . - exp
+    (29) exp -> exp . * exp
+    (30) exp -> exp . / exp
+    (31) exp -> exp . % exp
+    (39) relat_exp -> exp . EQ exp
+    (40) relat_exp -> exp . NEQ exp
+    (41) relat_exp -> exp . LT exp
+    (42) relat_exp -> exp . GT exp
+    (43) relat_exp -> exp . LEQ exp
+    (44) relat_exp -> exp . GEQ exp
+    (45) relat_exp -> exp . AND exp
+    (46) relat_exp -> exp . OR exp
+
+    END             reduce using rule 46 (relat_exp -> exp OR exp .)
+    OR              reduce using rule 46 (relat_exp -> exp OR exp .)
+    )               reduce using rule 46 (relat_exp -> exp OR exp .)
+    ;               reduce using rule 46 (relat_exp -> exp OR exp .)
+    +               shift and go to state 34
+    -               shift and go to state 35
+    *               shift and go to state 36
+    /               shift and go to state 37
+    %               shift and go to state 38
+    EQ              shift and go to state 39
+    NEQ             shift and go to state 40
+    LT              shift and go to state 41
+    GT              shift and go to state 42
+    LEQ             shift and go to state 43
+    GEQ             shift and go to state 44
+    AND             shift and go to state 45
+
+  ! +               [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! -               [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! *               [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! /               [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! %               [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! EQ              [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! NEQ             [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! LT              [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! GT              [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! LEQ             [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! GEQ             [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! AND             [ reduce using rule 46 (relat_exp -> exp OR exp .) ]
+  ! OR              [ shift and go to state 46 ]
+
+
+state 67
+
+    (32) exp -> ( exp ) .
+
+    END             reduce using rule 32 (exp -> ( exp ) .)
+    +               reduce using rule 32 (exp -> ( exp ) .)
+    -               reduce using rule 32 (exp -> ( exp ) .)
+    *               reduce using rule 32 (exp -> ( exp ) .)
+    /               reduce using rule 32 (exp -> ( exp ) .)
+    %               reduce using rule 32 (exp -> ( exp ) .)
+    EQ              reduce using rule 32 (exp -> ( exp ) .)
+    NEQ             reduce using rule 32 (exp -> ( exp ) .)
+    LT              reduce using rule 32 (exp -> ( exp ) .)
+    GT              reduce using rule 32 (exp -> ( exp ) .)
+    LEQ             reduce using rule 32 (exp -> ( exp ) .)
+    GEQ             reduce using rule 32 (exp -> ( exp ) .)
+    AND             reduce using rule 32 (exp -> ( exp ) .)
+    OR              reduce using rule 32 (exp -> ( exp ) .)
+    )               reduce using rule 32 (exp -> ( exp ) .)
+    ;               reduce using rule 32 (exp -> ( exp ) .)
+
+
+state 68
+
+    (21) sys_type_def -> ID .
+
+    ;               reduce using rule 21 (sys_type_def -> ID .)
+
+
+state 69
+
+    (13) type_decl -> ID EQ type_def . ;
+
+    ;               shift and go to state 79
+
+
+state 70
+
+    (14) type_def -> sys_type_def .
+
+    ;               reduce using rule 14 (type_def -> sys_type_def .)
+
+
+state 71
+
+    (15) type_def -> enum_type_def .
+
+    ;               reduce using rule 15 (type_def -> enum_type_def .)
+
+
+state 72
+
+    (16) sys_type_def -> INT .
+
+    ;               reduce using rule 16 (sys_type_def -> INT .)
+
+
+state 73
+
+    (17) sys_type_def -> REAL .
+
+    ;               reduce using rule 17 (sys_type_def -> REAL .)
+
+
+state 74
+
+    (18) sys_type_def -> BOOL .
+
+    ;               reduce using rule 18 (sys_type_def -> BOOL .)
+
+
+state 75
+
+    (19) sys_type_def -> CHAR .
+
+    ;               reduce using rule 19 (sys_type_def -> CHAR .)
+
+
+state 76
+
+    (20) sys_type_def -> STRING .
+
+    ;               reduce using rule 20 (sys_type_def -> STRING .)
+
+
+state 77
+
+    (22) enum_type_def -> ( . enum_elem_list )
+    (23) enum_elem_list -> . enum_elem , enum_elem_list
+    (24) enum_elem_list -> . enum_elem
+    (25) enum_elem -> . ID
+
+    ID              shift and go to state 82
+
+    enum_elem_list                 shift and go to state 80
+    enum_elem                      shift and go to state 81
+
+state 78
+
+    (8) const_exp -> ID EQ exp ; .
+
+    ID              reduce using rule 8 (const_exp -> ID EQ exp ; .)
+    TYPE            reduce using rule 8 (const_exp -> ID EQ exp ; .)
+    BEGIN           reduce using rule 8 (const_exp -> ID EQ exp ; .)
+
+
+state 79
+
+    (13) type_decl -> ID EQ type_def ; .
+
+    ID              reduce using rule 13 (type_decl -> ID EQ type_def ; .)
+    BEGIN           reduce using rule 13 (type_decl -> ID EQ type_def ; .)
+
+
+state 80
+
+    (22) enum_type_def -> ( enum_elem_list . )
+
+    )               shift and go to state 83
+
+
+state 81
+
+    (23) enum_elem_list -> enum_elem . , enum_elem_list
+    (24) enum_elem_list -> enum_elem .
+
+    ,               shift and go to state 84
+    )               reduce using rule 24 (enum_elem_list -> enum_elem .)
+
+
+state 82
+
+    (25) enum_elem -> ID .
+
+    ,               reduce using rule 25 (enum_elem -> ID .)
+    )               reduce using rule 25 (enum_elem -> ID .)
+
+
+state 83
+
+    (22) enum_type_def -> ( enum_elem_list ) .
+
+    ;               reduce using rule 22 (enum_type_def -> ( enum_elem_list ) .)
+
+
+state 84
+
+    (23) enum_elem_list -> enum_elem , . enum_elem_list
+    (23) enum_elem_list -> . enum_elem , enum_elem_list
+    (24) enum_elem_list -> . enum_elem
+    (25) enum_elem -> . ID
+
+    ID              shift and go to state 82
+
+    enum_elem                      shift and go to state 81
+    enum_elem_list                 shift and go to state 85
+
+state 85
+
+    (23) enum_elem_list -> enum_elem , enum_elem_list .
+
+    )               reduce using rule 23 (enum_elem_list -> enum_elem , enum_elem_list .)
 
