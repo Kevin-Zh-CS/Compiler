@@ -4,11 +4,45 @@ const
 PI = 3.1415926;
 RST = False;
 MSG = 'A simple test.';
-type
-int = Integer;
-double = Real;
-MONTHS = (JAN, FEB, MAR, APR);	{ Enumerate }
+{ type暂时没有实现 }
+var
+i, j : char;
+v, w : boolean = 4;
+
+
+procedure p1(a: string; c, b: real);
+var { define local variable }
+i, j : char;
+    procedure p2(a:string; c,b:real);   { nested procedure definition }
+    BEGIN
+    c := a+b
+    end;
+BEGIN
+c := p2()   { call procedure }
+end;
+
+label
+l1, l2, l3, l4;
+
+function gcd(a: Integer; b: Integer): Integer;	{ header }
+{ local declaration }
+    function my_mod(a: Integer; b: Integer): Integer;
+    begin
+        my_mod := a % b
+    end;
+{ local declaration end }
+begin
+	if b = 0 then
+    begin
+		gcd := a;
+        gcd := a	{ * no semicolon }
+    end
+	else
+		gcd := gcd(b, my_mod(a, b));	{ gcd can be both return value or function name }
+end;
+
 { ------------------------------ }
 BEGIN 
-not(5.0*(1--4)+2.1 and 123)
+i := true and not(5.0*(1--4)+2.1 and 123) ;
+i := not(5.0*(1--4)+2.1 and 123) 
 end.
