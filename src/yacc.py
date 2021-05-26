@@ -1,11 +1,7 @@
-import json
-from typing import Literal
 from llvmlite import ir
 from ply import yacc
 from lexer import Lexer
 from ast import *
-
-from llvmlite import ir
 
 class Parser:
     def __init__(self):
@@ -20,9 +16,13 @@ class Parser:
         block = main_func.append_basic_block()
         # Declare builder
         self.builder = ir.IRBuilder(block)
-        # Declare symbol_table
-        self.symbol_table = None
-        Node.init_nodes((self.builder, self.module, self.symbol_table))
+
+        Node.module = self.module
+        Node.builder = self.builder
+        # # Declare symbol_table
+        # self.symbol_table = None
+        # Init AST classes
+        # Node.init_nodes((self.builder, self.module, self.symbol_table))
     
 
     
@@ -189,9 +189,9 @@ class Parser:
                    | ARRAY OF vartype
         '''
         if len(p) == 4:
-            p[0] = ArrayType(length=p[3], type=p[6])
-        else:
             p[0] = ArrayType(length=0, type=p[3])
+        else:
+            p[0] = ArrayType(length=p[3], type=p[6])
     
     def p_semicolon_stmt_list(self, p):
         '''semicolon_stmt_list : semicolon_stmt_list ';' stmt
@@ -259,11 +259,11 @@ class Parser:
         p[0] = Case(exp=p[2], case_exp_list=p[4])
     
     def p_case_exp_list(self, p):
-        '''case_exp_list : case_exp_list case_exp
+        '''case_exp_list : case_exp_list ';' case_exp
                          | case_exp
         '''
         if len(p) == 2:
-            p[0] = p[1]
+            p[0] = [p[1]]
         else:
             if p[1] is None:
                 p[1] = []
@@ -271,8 +271,8 @@ class Parser:
             p[0] = p[1]
     
     def p_case_exp(self, p):
-        '''case_exp : literal ':' stmt ';'
-                    | ID ':' stmt ';'
+        '''case_exp : literal ':' stmt
+                    | ID ':' stmt
         '''
         # name is either identifier or constant
         p[0] = CaseExp(name=p[1], stmt=p[3])
@@ -290,10 +290,13 @@ class Parser:
     
     def p_call_stmt(self, p):
         '''call_stmt : ID '(' exp comma_exp_list ')'
+                     | vartype '(' exp ')'
                      | ID '(' ')'
         '''
         if len(p) == 4: # no arguments
             p[0] = Call(id=p[1], exp=[])
+        elif len(p) == 5:   # type conversion
+            p[0] = Call(id=p[1], exp=p[3])
         else:
             p[4].insert(0, p[3])
             p[0] = Call(id=p[1], exp=p[4])
@@ -314,7 +317,7 @@ class Parser:
         p[0] = If(exp=p[2], stmt=p[4], else_stmt=p[5])
     
     def p_else_stmt(self, p):
-        '''else_stmt : ELSE stmt ';'
+        '''else_stmt : ELSE stmt 
                      | empty %prec DANGLING
         '''
         # precedence ???

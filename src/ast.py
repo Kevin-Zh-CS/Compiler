@@ -83,13 +83,12 @@ class SymbleTable(object):
 class Node(ABC):
     
     builder  = None
-    module = ir.Module
+    module = None
     symbol_table = SymbleTable()
 
-    @staticmethod
-    def init_nodes(workbase):
-        builder, module, symbol_table = workbase
-
+    # @staticmethod
+    # def init_nodes(workbase):
+    #     builder, module, symbol_table = workbase
     
     
     # @abstractmethod
@@ -150,12 +149,12 @@ class LiteralVar(Node):
         self.type = type    # a string in ['int', 'real', 'bool', 'char', 'string']
     
 class LabelList(Node):
-    def __init__(self, label_list) -> None:
+    def __init__(self, label_list):
         super().__init__()
         self.id_list = label_list
 
 class ConstList(Node):
-    def __init__(self, const_list) -> None:
+    def __init__(self, const_list):
         super().__init__()
         self.const_list = const_list
 
@@ -212,6 +211,8 @@ class LabelStmt(Node):
 class Assign(Node):
     def __init__(self, lvalue, exp) -> None:
         super().__init__()
+        # lvalue can be either ID or array
+        # exp is None if lvalue is ID
         self.lvalue = lvalue
         self.exp = exp
 
@@ -223,6 +224,7 @@ class LValue(Node):
 
 
 class Call(Node):
+    # include type conversion, e.g., Integer(10.1)
     def __init__(self,id,exp) -> None:
         super().__init__()
         self.id = id
