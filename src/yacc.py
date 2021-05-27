@@ -149,9 +149,9 @@ class Parser:
                     | FUNCTION ID '(' ')' ':' vartype
         '''
         if len(p) == 7: # no fomal_list
-            p[0] = FuncHeader(id=p[2], formal_list=p[4], ret_type=p[7])
-        else:
             p[0] = FuncHeader(id=p[2], formal_list=[], ret_type=p[6])
+        else:
+            p[0] = FuncHeader(id=p[2], formal_list=p[4], ret_type=p[7])
     
     def p_formal_list(self, p):
         '''formal_list : formal semicolon_formal_list
@@ -182,16 +182,16 @@ class Parser:
                    | CHAR
                    | STRING
         '''
-        p[0] = Type(type=p[1])
+        p[0] = type=p[1]
     
     def p_vartype2(self, p):
         '''vartype : ARRAY '[' LITERAL_INT ']' OF vartype
-                   | ARRAY OF vartype
+                   | ARRAY '[' LITERAL_INT RANGE LITERAL_INT ']' OF vartype
         '''
-        if len(p) == 4:
-            p[0] = ArrayType(length=0, type=p[3])
+        if len(p) == 7:
+            p[0] = ArrayType(length=p[3], low_bound=0, type=p[6])
         else:
-            p[0] = ArrayType(length=p[3], type=p[6])
+            p[0] = ArrayType(length=p[5]-p[3], low_bound=p[3], type=p[8])
     
     def p_semicolon_stmt_list(self, p):
         '''semicolon_stmt_list : semicolon_stmt_list ';' stmt

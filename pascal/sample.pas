@@ -23,7 +23,6 @@ e: MONTHS;	{ e := JAN; integer(e)}
 s: String = 'Hello';	{ only support single quote }
 str: array[-1..1] of char = ('s', 't', 'r');
 book: Books;
-file_type: file of Real;
 { ------------------------------ }
 function gcd(a: Integer; b: Integer): Integer;	{ header }
 { local declaration }

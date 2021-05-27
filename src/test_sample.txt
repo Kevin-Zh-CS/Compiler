@@ -1,6 +1,35 @@
 program sample;
 { ------------------------------------------------------------ }
-
+const
+PI = 3.1415926;
+RST = False;
+MSG = 'GOOD NIGHT.';
+{ type暂时没有实现 }
+var
+tcase, a, b: Integer;
+c: Char = 'a';
+r: Real;
+bl: Bool = True;
+{ 我们的程序中string必须初始化 }
+s: String = 'Hello';	{ only support single quote }
+array1: array[5] of char;
+array2: array[1..6] of bool;
+{ 数组暂时不支持初始化 }
+{str: array[-1..1] of char = ('s', 't', 'r');}
+{ ------------------------------ }
+function gcd(a: Integer; b: Integer): Integer;	{ header }
+{ local declaration }
+function my_mod(a: Integer; b: Integer): Integer;
+begin
+	my_mod := a % b
+end;
+{ local declaration end }
+begin
+	if b = 0 then
+		gcd := a	{ * no semicolon }
+	else
+		gcd := gcd(b, my_mod(a, b))	{ gcd can be both return value or function name }
+end;
 { ------------------------------ }
 BEGIN 
 a := Integer(c) + Integer(num);
@@ -23,7 +52,7 @@ repeat
     a := a + 1
 until a >= 5;
 
-for a := 0 downto 3 do
+for a := 0 to 3 do
 	WriteLn('a = ', a);
 
 case a of
@@ -35,14 +64,14 @@ case a of
 	end;
 
 Read(tcase);	{ Readln(...) }
-	while tcase > 0 do
-	begin
-		tcase := tcase - 1;
-		Read(a, b);
-		Writeln(gcd(a, b))	{ Write(...) }
-	end;
+while tcase > 0 do
+begin
+	tcase := tcase - 1;
+	Read(a, b);
+	Writeln(gcd(a, b))	{ Write(...) }
+end;
 
 array2[1] := array1[0];
 i := true and not(5.0*(1--4)+2.1 and 123) ;
-i := not(5.0*(1--4)+2.1 and 123) 
+i := my_mod(a, b) + -5
 end.

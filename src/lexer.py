@@ -17,9 +17,10 @@ class Lexer:
         'type' : 'TYPE',
         'var' : 'VAR',
         'array' : 'ARRAY',
+        'label' : 'LABEL',
         'integer' : 'INT',  # data type
         'real' : 'REAL',
-        'boolean' : 'BOOL',
+        'bool' : 'BOOL',
         'char' : 'CHAR',
         'string' : 'STRING',
         'array' : 'ARRAY',
@@ -35,6 +36,7 @@ class Lexer:
         'do' : 'DO',
         'for' : 'FOR',
         'to' : 'TO',
+        'downto' : 'DOWNTO',
         'repeat' : 'REPEAT',
         'until' : 'UNTIL',
         'break' : 'BREAK',  # loop control  [break, continue, eixt, (goto)]
@@ -43,6 +45,7 @@ class Lexer:
         'goto' : 'GOTO',
         'function' : 'FUNCTION',    # sub program
         'procedure' : 'PROCEDURE',
+        'return' : 'RETURN',
         'and' : 'AND',   # boolean operators
         'or' : 'OR',
         'not' : 'NOT',
@@ -53,7 +56,7 @@ class Lexer:
         'LITERAL_INT', 'LITERAL_REAL', 'LITERAL_CHAR', 'LITERAL_STRING', 'LITERAL_BOOL',
         'EQ', 'NEQ', 'LT', 'GT', 'LEQ', 'GEQ', # relational operators
         'ID',
-        'ASSIN',
+        'ASSIGN',
         'RANGE',
         'COMMENT'
     ]
@@ -67,7 +70,7 @@ class Lexer:
     t_LEQ = r'\<\='
     t_GEQ = r'\>\='
 
-    t_ASSIN = r'\:\='
+    t_ASSIGN = r'\:\='
 
     t_RANGE = r'\.\.'
 
@@ -136,4 +139,4 @@ if __name__ == '__main__':
 
     # Tokenize
     for tok in lexer:   # same as tok = lexer.token() and tok != None
-        print(tok)  # (type, value, lineno, pos)
+        print(tok)  # (type, value, lineno, pos)()
