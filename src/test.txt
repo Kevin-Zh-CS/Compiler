@@ -13,6 +13,8 @@ bl: Bool = True;
 s: String = 'Hello';	{ only support single quote }
 array1: array[5] of char;
 array2: array[2] of int;
+label
+x, t, z;
 { 数组暂时不支持初始化和动态下标 }
 {str: array[-1..1] of char = ('s', 't', 'r');}
 { ------------------------------ }

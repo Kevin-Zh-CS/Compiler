@@ -294,12 +294,12 @@ class Parser:
                      | ID '(' ')'
         '''
         if len(p) == 4: # no arguments
-            p[0] = Call(id=p[1], exp=[])
+            p[0] = Call(id=p[1], exp_list=[])
         elif len(p) == 5:   # type conversion
-            p[0] = Call(id=p[1], exp=p[3])
+            p[0] = Call(id=p[1], exp_list=[p[3]])
         else:
             p[4].insert(0, p[3])
-            p[0] = Call(id=p[1], exp=p[4])
+            p[0] = Call(id=p[1], exp_list=p[4])
     
     def p_comma_exp_list(self, p):
         '''comma_exp_list : comma_exp_list ',' exp

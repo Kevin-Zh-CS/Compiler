@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import enum
+from re import L
 
 from llvmlite.ir.types import ArrayType
 
@@ -8,9 +8,6 @@ import llvmlite.ir as ir
 import llvmlite.binding as llvm
 
 tokens = Lexer.tokens
-
-# @enum.unique
-# class Type(enum):
 
 class Helper():
     base_type = {'int': ir.IntType(32),
@@ -97,7 +94,14 @@ class SymbolTable(object):
     def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
         # TODO func and proc entry(type)
         if id in self.scope_table[-1]:
-            raise Exception("Redefine symbol %s!" % id)
+            if type == 'label':
+                assert addr != None
+                if not self.global_table[id][-1]['addr']:
+                    self.global_table[id][-1]['addr'] = addr
+                else:
+                    raise Exception("label %s reappeared." % id)
+            else:
+                raise Exception("redefine symbol %s!" % id)
 
         self.scope_table[-1].append(id)
         self.global_table.setdefault(id, [])    # add an empty list if the symbol is not in the table
@@ -105,7 +109,7 @@ class SymbolTable(object):
         entry = {}
         entry['type'] = type
         entry['addr'] = addr
-        if type not in Helper.base_type and type != 'string':
+        if type not in Helper.base_type and type != 'string' and type != 'label':
             # array, function or procedure
             if type == 'array':
                 assert length != 0 and ele_type in Helper.base_type
@@ -135,70 +139,6 @@ class SymbolTable(object):
     def get_symbol_addr(self, id):
         return self.get_symbol(id)['addr']
 
-    # def add_var(self, var_name, addr, scope_id, var_type=None):
-    #     self.var_table.setdefault(var_name, []).append((addr, var_type))
-    #     self.scope_var.setdefault(scope_id, []).append(var_name)
-
-    # def add_fn(self, fn_name, fn_block, scope_id):
-    #     self.fn_table.setdefault(fn_name, []).append(fn_block)
-    #     self.scope_fn.setdefault(scope_id, []).append(fn_name)
-
-    # def add_type(self, name, type_def, scope_id):
-    #     self.type_table.setdefault(name, []).append(type_def)
-    #     self.scope_type.setdefault(scope_id, []).append(name)
-
-    # def fetch_var_addr(self, var_name):
-    #     o = self.var_table.get(var_name, None)
-    #     if o:
-    #         return o[-1][0]
-    #     else:
-    #         raise CodegenError('Can not find symble {0}'.format(var_name))
-
-    # def fetch_var_addr_type(self, var_name):
-    #     o = self.var_table.get(var_name, None)
-    #     if o:
-    #         return o[-1]
-    #     else:
-    #         raise CodegenError('Can not find symble {0}'.format(var_name))
-
-    # def fetch_fn_block(self, fn_name):
-    #     o = self.fn_table.get(fn_name, None)
-    #     if o:
-    #         return o[-1]
-    #     else:
-    #         raise CodegenError('Can not find function {0}'.format(fn_name))
-
-    # def fetch_type(self, type_name):
-    #     o = self.type_table.get(type_name, None)
-    #     if o:
-    #         return o[-1]
-    #     else:
-    #         raise CodegenError('Can not find type {0}'.format(type_name))
-
-    # def remove_var(self, var_name):
-    #     o = self.var_table.get(var_name, None)
-    #     if o:
-    #         del o[-1]
-    #     else:
-    #         raise CodegenError('Remove var {0} that not exsists!'.format(var_name))
-
-    # def remove_scope(self, scope_id):
-    #     for name in self.scope_var.get(scope_id, []):
-    #         o = self.var_table.get(name, None)
-    #         if o:
-    #             del o[-1]
-    #         else:
-    #             raise CodeGenerator('Remove var {0} that not exsists!'.format(name))
-    #     del self.scope_var[scope_id]
-    #     scope_id += 1
-    #     for name in self.scope_fn.get(scope_id, []):
-    #         o = self.fn_table.get(name, None)
-    #         if o:
-    #             del o[-1]
-    #         else:
-    #             raise CodeGenerator('Remove var {0} that not exsists!'.format(name))
-    #     if scope_id in self.scope_fn.keys():
-    #         del self.scope_fn[scope_id]
 
 
 class Node(ABC):
@@ -327,7 +267,12 @@ class LabelList(Node):
     def __init__(self, label_list):
         super().__init__()
         self.id_list = label_list
-
+    
+    def irgen(self):
+        for id in self.id_list:
+            # add to symbol table
+            Node.symbol_table.add_symbol(id, 'label', None)
+            
 class ConstList(Node):
     def __init__(self, const_list):
         super().__init__()
@@ -388,7 +333,6 @@ class Formal(Node):
                         Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
                     else:
                         Node.symbol_table.add_symbol(id, self.type, addr)
-            
 
 class ArrayType(Node):
     def __init__(self,length,low_bound, type):
@@ -406,7 +350,22 @@ class LabelStmt(Node):
     def __init__(self,id,non_label_stmt):
         super().__init__()
         self.id = id
-        self.label_stmt = non_label_stmt
+        self.non_label_stmt = non_label_stmt
+    
+    def irgen(self):
+        # declare labeled statement as a basic block
+        self.ir_var = Node.builder.append_basic_block(self.id)
+        Node.builder.branch(self.ir_var)
+        # add label to symbol table
+        Node.symbol_table.add_symbol(self.id, 'label', self.ir_var)
+        Node.builder.position_at_start(self.ir_var)
+        next_block = Node.builder.append_basic_block()
+
+        self.non_label_stmt.irgen()
+
+        # branch to next block
+        Node.builder.branch(next_block)
+        Node.builder.position_at_start(next_block)
 
 class Assign(Node):
     def __init__(self, lvalue, exp):
@@ -444,14 +403,42 @@ class LValue(Node):
             # gep: get element ptr
             self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
 
-
-
 class Call(Node):
     # include type conversion, e.g., Int(10.1)
-    def __init__(self,id,exp):
+    def __init__(self,id,exp_list):
         super().__init__()
         self.id = id
-        self.exp = exp
+        self.exp_list = exp_list
+    
+    def irgen(self):
+        ''' set self.type and self.ir_var
+            check function
+        '''
+        for exp in self.exp_list:
+            exp.irgen()
+        if self.id in Helper.base_type:
+            # type conversion
+            if self.id == 'int' and self.exp_list[0].type == 'real':
+                self.type = 'int'
+                self.ir_var = Node.builder.fptosi(self.exp_list[0].ir_var, Helper.base_type['int'])
+            elif self.id == 'real' and self.exp_list[0].type == 'int':
+                self.type = 'real'
+                self.ir_var = Node.builder.sitofp(self.exp_list[0].ir_var, Helper.base_type['real'])
+            else:
+                raise Exception("unsopported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
+        else:
+            func = Node.symbol_table.get_symbol(self.id)
+            formal_list = list(func['formal_list'].values())
+            self.type = func['ret_type']
+            # check arguments number
+            if len(formal_list) != len(self.exp_list):
+                raise Exception("%s() takes %d positional arguments but %d were given." % (self.id, len(formal_list)), len(self.exp_list)))
+            # check arguments type
+            for i in range(len(self.exp_list)):
+                if self.exp_list.type != formal_list[i]['type']:
+                    raise Exception("%s() gets wrong parameter type." % self.type)
+            # pass all check points
+            self.ir_var = Node.builder.call(func['addr'], [exp.ir_var for exp in self.exp_list])
 
 class For(Node):
     def __init__(self,id,exp1,direct,exp2,stmt):
@@ -497,6 +484,15 @@ class Goto(Node):
     def __init__(self, id):
         super().__init__()
         self.id = id
+    
+    def irgen(self):
+        tmp_block = Node.builder.append_basic_block()
+        Node.builder.branch(tmp_block)
+        Node.builder.position_at_start(tmp_block)
+        goto_block = Node.symbol_table.get_symbol_addr(self.id)
+        Node.builder.branch(goto_block)
+        next_block = Node.builder.append_basic_block()
+        Node.builder.position_at_start(next_block)
 
 class BinExp(Node):
     def __init__(self, operator, exp1, exp2):
@@ -556,7 +552,6 @@ class BinExp(Node):
             assert self.ir_var and self.type    # make sure the assignment is successful            
         except:
             raise Exception("unsupported operand type(s) for %s: '%s' and '%s'." % (self.operator, self.exp1.type, self.exp2.type))
-        
 
 class UniExp(Node):
     def __init__(self, operator, exp):
@@ -586,7 +581,6 @@ class UniExp(Node):
             assert self.ir_var and self.type    # make sure the assignment is successful            
         except:
             raise Exception("unsupported operand type(s) for %s: '%s'." % (self.operator, self.exp.type))
-        
 
 class Array(Node):
     def __init__(self, id, exp):
