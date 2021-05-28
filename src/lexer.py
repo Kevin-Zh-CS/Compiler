@@ -18,7 +18,7 @@ class Lexer:
         'var' : 'VAR',
         'array' : 'ARRAY',
         'label' : 'LABEL',
-        'integer' : 'INT',  # data type
+        'int' : 'INT',  # data type
         'real' : 'REAL',
         'bool' : 'BOOL',
         'char' : 'CHAR',

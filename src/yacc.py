@@ -39,7 +39,7 @@ class Parser:
         ('nonassoc', 'LT', 'GT', 'LEQ', 'GEQ'),
         ('left', '+', '-'),
         ('left', '*', '/', '%'),
-        ('right', 'UMINUS', 'NOT'),    # Unary minus operator
+        ('right', 'UMINUS', 'UPLUS', 'NOT'),    # Unary minus operator
         ('nonassoc', 'BRACKETS'),
         ('nonassoc', 'DANGLING'),
     )
@@ -100,9 +100,9 @@ class Parser:
         '''
         # id_list is a list of strings
         if len(p) == 5:
-            p[0] = Var(id_list=p[1], vartype=p[3], var=None)
+            p[0] = Var(id_list=p[1], vartype=p[3], exp=None)
         else:
-            p[0] = Var(id_list=p[1], vartype=p[3], var=p[5])
+            p[0] = Var(id_list=p[1], vartype=p[3], exp=p[5])
 
     def p_const_exp_list(self, p):
         '''const_exp_list : const_exp_list const_exp
@@ -364,16 +364,20 @@ class Parser:
                | exp AND exp
                | exp OR exp
         '''
-        p[0] = BinExp(operant=p[2], exp1=p[1], exp2=p[3])
+        p[0] = BinExp(operator=p[2], exp1=p[1], exp2=p[3])
     
     def p_exp3(self, p):
         '''exp : NOT exp
+               | '-' exp %prec UMINUS
+               | '+' exp %prec UPLUS
         '''
-        p[0] = UniExp(operant=p[1], exp=p[2])
+        p[0] = UniExp(operator=p[1], exp=p[2])
 
-    def p_exp_uminus(self, p):
-        "exp : '-' exp %prec UMINUS"
-        p[0] = UniExp(operant=p[1], exp=p[2])
+    # def p_exp_uminus(self, p):
+    #     '''exp : '-' exp %prec UMINUS
+    #            | '+' exp %prec UPLUS
+    #     '''
+    #     p[0] = UniExp(operator=p[1], exp=p[2])
 
     def p_exp4(self, p):
         '''exp : '(' exp ')'
@@ -382,16 +386,19 @@ class Parser:
     
     def p_exp5(self, p):
         '''exp : ID
-               | literal
         '''
-        # p[0] is a string or a constant value
-        p[0] = p[1]
+        p[0] = IdExp(id=p[1])
     
     def p_exp6(self, p):
-        '''exp : ID '[' LITERAL_INT ']'
+        '''exp : literal
+        '''
+        p[0] = p[1]
+    
+    def p_exp7(self, p):
+        '''exp : ID '[' exp ']'
         '''
         # p[0] is a string or a constant value
-        p[0] = Array(id=p[1], index=p[3])
+        p[0] = Array(id=p[1], exp=p[3])
     
         
     def p_empty(self, p):
@@ -404,7 +411,7 @@ class Parser:
 if __name__ == '__main__':
     parser = Parser()
 
-    fin = open("/Users/xy/Compiler/src/test_sample.txt")
+    fin = open("/Users/xy/Compiler/src/test.txt")
     root = parser.parse(fin.read().lower())
     fin.close()
     # root = parser.parse('''program sample;

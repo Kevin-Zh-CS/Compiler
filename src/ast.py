@@ -13,11 +13,23 @@ tokens = Lexer.tokens
 # class Type(enum):
 
 class Helper():
-    base_type = {'integer': ir.IntType(32),
-               'real': ir.FloatType(),
-               'char': ir.IntType(8),
-               'bool': ir.IntType(1)
-               }
+    base_type = {'int': ir.IntType(32),
+                 'real': ir.FloatType(),
+                 'char': ir.IntType(8),
+                 'bool': ir.IntType(1)
+                }
+
+    artimetic_op = ['+', '-', '*', '/', '%']
+    relation_op = ['=', '<>', '<', '>', '<=', '>=']
+    logic_op = ['not', 'and']
+
+    ir_relation_op = {'=': '==',
+                      '<>': '!=',
+                      '<': '<',
+                      '>': '>',
+                      '<=': '<=',
+                      '>=': '>=' 
+                     }
 
     @staticmethod
     def get_ir_type(type, length=0, str=None):
@@ -40,13 +52,13 @@ class Helper():
         raise Exception("Invalid data type")
     
     @staticmethod
-    def get_ir_var(ir_type, var):
-        if type == 'string':
+    def get_ir_var(ir_type, var, is_str=0):
+        if is_str:
             value = bytearray(var.encode("utf-8"))
-        elif type == 'bool':
+        elif ir_type == ir.IntType(1):  # bool
                 if var == 'true':
                     value = 1
-                elif var == 'flase':
+                elif var == 'false':
                     value = 0
                 else:
                     value = var
@@ -82,7 +94,8 @@ class SymbolTable(object):
                 self.global_table.pop(id)
         self.scope_table.pop()  # delete this scope
     
-    def add_symbol(self, id, type, addr, ele_type=None, ret_type=None, formal_list=[]):    # TODO func and proc entry(type)
+    def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
+        # TODO func and proc entry(type)
         if id in self.scope_table[-1]:
             raise Exception("Redefine symbol %s!" % id)
 
@@ -95,7 +108,10 @@ class SymbolTable(object):
         if type not in Helper.base_type and type != 'string':
             # array, function or procedure
             if type == 'array':
+                assert length != 0 and ele_type in Helper.base_type
                 entry['ele_type'] = ele_type
+                entry['length'] = length
+                entry['low_bound'] = low_bound
             elif type == 'function':
                 entry['ret_type'] = ret_type
                 entry['formal_list'] = formal_list
@@ -105,6 +121,19 @@ class SymbolTable(object):
                 raise Exception("Invalid data type")
 
         self.global_table[id].append(entry)
+    
+    def get_symbol(self, id):
+        id_list = self.global_table.get(id, None)
+        if id_list:
+            return id_list[-1]
+        else:
+            raise Exception("No symbol named \'%s\'!" % id)
+    
+    def get_symbol_type(self, id):
+        return self.get_symbol(id)['type']
+    
+    def get_symbol_addr(self, id):
+        return self.get_symbol(id)['addr']
 
     # def add_var(self, var_name, addr, scope_id, var_type=None):
     #     self.var_table.setdefault(var_name, []).append((addr, var_type))
@@ -182,11 +211,6 @@ class Node(ABC):
     # def init_nodes(workbase):
     #     builder, module, symbol_table = workbase
 
-    @staticmethod
-    def get_exp_var(exp):
-        pass
-        return value
-
     # @abstractmethod
     def irgen(self):
         ''' code generation '''
@@ -201,8 +225,6 @@ class Program(Node):
 
     def irgen(self):
         ir.FunctionType(ir.VoidType(), ())
-        
-
 
 
 class Body(Node):
@@ -228,11 +250,11 @@ class VarList(Node):
             var.irgen()
 
 class Var(Node):
-    def __init__(self, id_list, vartype, var):
+    def __init__(self, id_list, vartype, exp):
         super().__init__()
         self.id_list = id_list
         self.vartype = vartype  # type or ArrayType
-        self.var = var  # None if no initialization value
+        self.exp = exp  # None if no initialization value
                         # otherwise Exp
     
     def irgen(self):
@@ -241,10 +263,10 @@ class Var(Node):
             store symbol to symbol table
         '''
         if isinstance(self.vartype, ArrayType):
-            ir_type = Helper.get_ir_type(self.vartype, length=self.vartype.length)
+            ir_type = Helper.get_ir_type(self.vartype.type, length=self.vartype.length)
             self.type = 'array'
         elif self.vartype == 'string':
-            ir_type = Helper.get_ir_type(self.vartype, str=self.var)
+            ir_type = Helper.get_ir_type(self.vartype, str=self.exp.var)
             self.type = self.vartype
         else:
             ir_type = Helper.get_ir_type(self.vartype)
@@ -253,10 +275,14 @@ class Var(Node):
         with Node.builder.goto_entry_block():
             for id in self.id_list:
                 addr = Node.builder.alloca(ir_type, name=id)
-                if self.var:    # initialize variable
-                    ir_var = Node.get_exp_var(self.var)
-                    Node.builder.store(ir_var, addr)   # store value
-                self.symbol_table.add_symbol(id, self.type, addr)
+                if self.exp:    # initialize variable
+                    self.exp.irgen()
+                    Node.builder.store(self.exp.ir_var, addr)   # store value
+                # add to symbol table
+                if isinstance(self.vartype, ArrayType): # array
+                    Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
+                else:
+                    Node.symbol_table.add_symbol(id, self.type, addr)
 
 class ConstExp(Node):
     def __init__(self, id_list, var):
@@ -270,9 +296,17 @@ class ConstExp(Node):
             for id in self.id_list:
                 addr = Node.builder.alloca(self.var.ir_type, name=id)
                 Node.builder.store(self.var.ir_var, addr)   # store value
-                self.symbol_table.add_symbol(id, self.var.type, addr)
-                # TODO add to symbol table, including id, type and ir_var
+                Node.symbol_table.add_symbol(id, self.var.type, addr)
 
+class IdExp(Node):
+    def __init__(self, id):
+        super().__init__()
+        self.id = id    # a string
+    
+    def irgen(self):
+        self.type = Node.symbol_table.get_symbol_type(self.id)
+        addr = Node.symbol_table.get_symbol(self.id)['addr']
+        self.ir_var = Node.builder.load(addr)
 
 class LiteralVar(Node):
     def __init__(self, var, type):
@@ -281,20 +315,13 @@ class LiteralVar(Node):
         self.type = type    # a string in ['int', 'real', 'bool', 'char', 'string']
     
     def irgen(self):
-        ''' generate self.ir_var '''
+        ''' set self.ir_var '''
         if self.type == 'string':
             self.ir_type = Helper.get_ir_type(self.type, str=self.var)
+            self.ir_var = Helper.get_ir_var(self.ir_type, self.var, is_str=1)
         else:
             self.ir_type = Helper.get_ir_type(self.type)
-        self.ir_var = Helper.get_ir_var(self.ir_type, self.var)
-        # if self.type == 'string':
-        #     length = len(self.var)
-        #     value = bytearray(self.var.encode("utf-8"))
-        # else:
-        #     length = 0
-        #     value = int(eval(self.var.capitalize())) if self.type == 'bool' else self.var
-        # self.ir_type = Helper.get_ir_type(self.type, length)
-        # self.ir_var = ir.Constant(self.ir_type, value)
+            self.ir_var = Helper.get_ir_var(self.ir_type, self.var)
 
 class LabelList(Node):
     def __init__(self, label_list):
@@ -329,19 +356,46 @@ class FuncHeader(Node):
         self.id = id
         self.formal_list = formal_list  # a list of formal
         self.ret_type = ret_type
+    
+    def irgen(self):
+        for formal in self.formal_list:
+            formal.irgen()
 
 class Formal(Node):
     def __init__(self, id_list, para_type):
         super().__init__()
         self.id_list = id_list  # a list of strings
-        self.var_type = para_type   # type or ArrayType
+        self.vartype = para_type   # type or ArrayType
+    
+    def irgen(self):
+        ''' add ids to symbol table '''
+        for id in self.id_list:
+            # get symbol type and ir_type
+            if isinstance(self.vartype, ArrayType):
+                ir_type = Helper.get_ir_type(self.vartype.type, length=self.vartype.length)
+                self.type = 'array'
+            elif self.vartype == 'string':
+                ir_type = Helper.get_ir_type(self.vartype, str="formal")
+                self.type = self.vartype
+            else:
+                ir_type = Helper.get_ir_type(self.vartype)
+                self.type = self.vartype
+
+            with Node.builder.goto_entry_block():
+                for id in self.id_list:
+                    addr = Node.builder.alloca(ir_type, name=id)
+                    if isinstance(self.vartype, ArrayType): # array
+                        Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
+                    else:
+                        Node.symbol_table.add_symbol(id, self.type, addr)
+            
 
 class ArrayType(Node):
     def __init__(self,length,low_bound, type):
         super().__init__()
         self.length = length
         self.low_bound = low_bound
-        self.type = type    # Type?
+        self.type = type
     
 class Compound(Node):
     def __init__(self,stmt_list):
@@ -359,6 +413,15 @@ class Assign(Node):
         super().__init__()
         self.lvalue = lvalue    # lvalue can be either ID or array
         self.exp = exp  # exp is None if lvalue is ID
+    
+    def irgen(self):
+        self.lvalue.irgen()
+        self.exp.irgen()
+        # check type
+        if self.lvalue.type != self.exp.type:
+            raise Exception("unsupported operand type(s) for :=: '%s' and '%s'." % (self.lvalue.type, self.exp.type))
+        with Node.builder.goto_entry_block():
+            Node.builder.store(self.exp.ir_var, self.lvalue.addr)   # assign value
 
 class LValue(Node):
     def __init__(self, id, exp):
@@ -366,9 +429,25 @@ class LValue(Node):
         self.id = id
         self.exp = exp  # none if not array
 
+    def irgen(self):
+        ''' set the address of left value self.addr
+            set self.type
+        '''
+        symbol_entry = Node.symbol_table.get_symbol(self.id)
+        self.addr = symbol_entry['addr']
+        self.type = symbol_entry['type']
+        if self.exp:    # array
+            assert self.type == 'array'
+            self.type = symbol_entry['ele_type']
+            # add1 = Node.builder.gep(addr, [ir.Constant(ir.IntType(32),0)])
+            self.exp.irgen()
+            # gep: get element ptr
+            self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
+
+
 
 class Call(Node):
-    # include type conversion, e.g., Integer(10.1)
+    # include type conversion, e.g., Int(10.1)
     def __init__(self,id,exp):
         super().__init__()
         self.id = id
@@ -420,33 +499,113 @@ class Goto(Node):
         self.id = id
 
 class BinExp(Node):
-    def __init__(self, operant, exp1, exp2):
+    def __init__(self, operator, exp1, exp2):
         super().__init__()
-        self.operant = operant
+        self.operator = operator
         self.exp1 = exp1
         self.exp2 = exp2
-        self.type = None    # type of result
-        # self.irgen()
 
     def irgen(self):
-        ''' operant belongs to ['+', '-', '*', '/', '%', 
+        ''' operator belongs to ['+', '-', '*', '/', '%', 
             '=', '<>', '<', '>', '<=', '>=', 'and', 'or'
+            generate self.type and self.ir_var
         '''
-        # exp1 = self.exp1.irgen()
-        # exp2 = self.exp2.irgen()
-        a = 1
+        self.exp1.irgen()
+        self.exp2.irgen()
+        # check type
+        if self.exp1.type != self.exp2.type:
+            raise Exception("unsupported operand type(s) for %s: '%s' and '%s'." % (self.operator, self.exp1.type, self.exp2.type))
+        if self.operator in Helper.artimetic_op:
+            # arithmetic operation
+            self.type = self.exp1.type
+            if self.type == 'int':
+                if self.operator == '+':
+                    self.ir_var = Node.builder.add(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '-':
+                    self.ir_var = Node.builder.sub(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '*':
+                    self.ir_var = Node.builder.mul(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '/':
+                    self.ir_var = Node.builder.sdiv(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '%':
+                    self.ir_var = Node.builder.srem(self.exp1.ir_var, self.exp2.ir_var)
+            elif self.operator == 'real':
+                if self.operator == '+':
+                    self.ir_var = Node.builder.fadd(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '-':
+                    self.ir_var = Node.builder.fsub(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '*':
+                    self.ir_var = Node.builder.fmul(self.exp1.ir_var, self.exp2.ir_var)
+                elif self.operator == '/':
+                    self.ir_var = Node.builder.fdiv(self.exp1.ir_var, self.exp2.ir_var)
+        elif self.operator in Helper.relation_op:
+            # realationship operation
+            self.type = 'bool'
+            op = Helper.ir_relation_op[self.operator]
+            operant_type = self.exp1.type
+            if operant_type == 'int' or operant_type == 'bool':
+                self.ir_var = Node.builder.icmp_signed(op, self.exp1.ir_var, self.exp2.ir_var)
+            else:
+                self.ir_var = Node.builder.fcmp_ordered(op, self.exp1.ir_var, self.exp2.ir_var)
+        elif self.operator in Helper.logic_op:
+            if self.operator == 'and':
+                self.ir_var = Node.builder.and_(self.exp1.ir_var, self.exp2.ir_var)
+            elif self.operator == 'or':
+                self.ir_var = Node.builder.or_(self.exp1.ir_var, self.exp2.ir_var)      
+        try:
+            assert self.ir_var and self.type    # make sure the assignment is successful            
+        except:
+            raise Exception("unsupported operand type(s) for %s: '%s' and '%s'." % (self.operator, self.exp1.type, self.exp2.type))
         
 
 class UniExp(Node):
-    def __init__(self, operant, exp):
+    def __init__(self, operator, exp):
         super().__init__()
-        self.operant = operant
+        self.operator = operator
         self.exp = exp
-        self.type = None
+    
+    def irgen(self):
+        ''' set self.ir_var and self.type
+            operator belongs to ['not', '+', '-']
+        '''
+        self.exp.irgen()
+        if self.operator == 'not':
+            self.type = 'bool'
+            self.ir_var = Node.builder.not_(self.exp.ir_var)
+        elif self.operator == '+':
+            self.type = self.exp.type
+            self.ir_var = self.exp.ir_var
+        elif self.operator == '-':
+            self.type = self.exp.type
+            if self.type == 'int':
+                self.ir_var = Node.builder.neg(self.exp.ir_var)
+            elif self.type == 'real':
+                self.ir_var = Node.builder.fsub(ir.Constant(ir.IntType(32), 0), self.exp.ir_var)
+        
+        try:
+            assert self.ir_var and self.type    # make sure the assignment is successful            
+        except:
+            raise Exception("unsupported operand type(s) for %s: '%s'." % (self.operator, self.exp.type))
+        
 
 class Array(Node):
-    def __init__(self, id, index):
+    def __init__(self, id, exp):
         super().__init__()
         self.id = id
-        self.index = index
+        self.exp = exp
+    
+    def irgen(self):
+        ''' set self.ir_var and self.type
+        '''
+        # ir_var = id[exp]
+        symbol_entry = Node.symbol_table.get_symbol(self.id)
+        self.addr = symbol_entry['addr']
+        self.type = symbol_entry['type']
+
+        assert self.type == 'array'
+        self.type = symbol_entry['ele_type']
+        self.exp.irgen()
+        # gep: get element ptr
+        addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
+        self.ir_var = Node.builder.load(addr)
 

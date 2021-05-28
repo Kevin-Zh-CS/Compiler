@@ -8,12 +8,11 @@ MSG = 'GOOD NIGHT.';
 var
 tcase, a, b: Int;
 c: Char = 'a';
-r: Real;
 bl: Bool = True;
 { 我们的程序中string必须初始化 }
 s: String = 'Hello';	{ only support single quote }
 array1: array[5] of char;
-array2: array[2] of bool;
+array2: array[2] of int;
 { 数组暂时不支持初始化和动态下标 }
 {str: array[-1..1] of char = ('s', 't', 'r');}
 { ------------------------------ }
@@ -21,7 +20,7 @@ function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
 function my_mod(a: Int; b: Int): Int;
 begin
-	array1[9] := 1+2;
+	array2[9] := 1++2;
 	my_mod := a % b
 end;
 { local declaration end }
