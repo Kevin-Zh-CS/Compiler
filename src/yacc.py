@@ -1,4 +1,5 @@
 from llvmlite import ir
+import llvmlite.binding as llvm
 from ply import yacc
 from lexer import Lexer
 from ast import *
@@ -82,7 +83,7 @@ class Parser:
     def p_local4(self, p):
         '''local : header ';' body ';'
         '''
-        p[0] = LocalHeader(header=p[0], body=p[3])
+        p[0] = LocalHeader(header=p[1], body=p[3])
     
     def p_var_list(self, p):
         '''var_list : var_list var
@@ -422,5 +423,20 @@ if __name__ == '__main__':
     #                     BEGIN 
     #                     i := not(5.0*(1--4)+2.1 and 123) 
     #                     end.'''.lower())
-
+    root.irgen()
     print(type(root))
+    print(root.module)
+
+    print('=== LLVM IR')
+    print(root.module)
+
+    # Convert textual LLVM IR into in-memory representation.
+    llvm_module = llvm.parse_assembly(str(root.module))
+
+    tm = llvm.Target.from_default_triple().create_target_machine()
+
+    # Compile the module to machine code using MCJIT
+    with llvm.create_mcjit_compiler(llvm_module, tm) as ee:
+        ee.finalize_object()
+        print('=== Assembly')
+        print(tm.emit_assembly(llvm_module))

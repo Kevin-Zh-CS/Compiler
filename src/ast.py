@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from re import L
 
 from llvmlite.ir.types import ArrayType
 
@@ -122,7 +121,7 @@ class SymbolTable(object):
             elif type == 'procedure':
                 entry['formal_list'] = formal_list
             else:
-                raise Exception("Invalid data type")
+                raise Exception("invalid symbol type")
 
         self.global_table[id].append(entry)
     
@@ -131,15 +130,13 @@ class SymbolTable(object):
         if id_list:
             return id_list[-1]
         else:
-            raise Exception("No symbol named \'%s\'!" % id)
+            raise Exception("no symbol named \'%s\'!" % id)
     
     def get_symbol_type(self, id):
         return self.get_symbol(id)['type']
     
     def get_symbol_addr(self, id):
         return self.get_symbol(id)['addr']
-
-
 
 class Node(ABC):
     
@@ -164,8 +161,7 @@ class Program(Node):
         self.body = body
 
     def irgen(self):
-        ir.FunctionType(ir.VoidType(), ())
-
+        self.body.irgen()
 
 class Body(Node):
     def __init__(self, block, local_list):
@@ -183,7 +179,6 @@ class VarList(Node):
     def __init__(self, var_list):
         super().__init__()
         self.var_list = var_list
-        self.irgen()
 
     def irgen(self):
         for var in self.var_list:
@@ -277,7 +272,6 @@ class ConstList(Node):
     def __init__(self, const_list):
         super().__init__()
         self.const_list = const_list
-        self.irgen()
     
     def irgen(self):
         for const_exp in self.const_list:
@@ -288,12 +282,68 @@ class LocalHeader(Node):
         super().__init__()
         self.header = header
         self.body = body
+    
+    def irgen(self):
+        ''' register function/procedure to symbol table
+            open symbol tbale scope
+            impelement statements
+            close scope
+        '''
+        header_type = 'procedure' if isinstance(self.header, ProcHeader) else 'function'
+        ret_type = None if isinstance(self.header, ProcHeader) else self.header.ret_type
+        ret_ir_type = ir.VoidType() if isinstance(self.header, ProcHeader) else Helper.get_ir_type(self.header.ret_type)
+
+        # get type and ir_type of formal parameters
+        formal_ir_types, formal_types = self.header.get_formal_type()
+        # declare function
+        header_ir_type = ir.FunctionType(ret_ir_type, formal_ir_types)
+        ir_func = ir.Function(Node.module, header_ir_type, self.header.id)
+        # add function to symbol table
+        Node.symbol_table.add_symbol(self.header.id, header_type, ir_func, ret_type=ret_type, formal_list=formal_types)
+
+        Node.symbol_table.open_scope()
+        # the return value has the same id as the function
+        if header_type == 'function':
+            ret_formal = Formal([self.header.id], ret_type)
+            ret_formal.get_formal_type()
+            ret_formal.irgen()
+            ret_addr = Node.symbol_table.get_symbol_addr(self.header.id)
+        self.header.irgen() # add formal parameters to symbol table
+
+        # create a new block
+        header_block = ir_func.append_basic_block(self.header.id+ '_entry')
+        # Node.builder = ir.IRBuilder(header_block)
+        with Node.builder.goto_block(header_block):
+            self.body.irgen()   # implement statements
+
+            if header_type == 'function':
+                ret_var = Node.builder.load(ret_addr)
+                Node.builder.ret(ret_var)
+            else:
+                Node.builder.ret_void()
+        
+        Node.symbol_table.close_scope()
 
 class ProcHeader(Node):
     def __init__(self, id, formal_list):
         super().__init__()
         self.id = id
         self.formal_list = formal_list
+    
+    def get_formal_type(self):
+        ''' return formal_ir_type_list
+        '''
+        formal_ir_type_list = []
+        formal_type_list = []
+        for formal in self.formal_list:
+            formal_ir_type, formal_type = formal.get_formal_type()
+            formal_ir_type_list += formal_ir_type
+            formal_type_list += formal_type
+        return formal_ir_type_list, formal_type_list
+    
+    def irgen(self):
+        for formal in self.formal_list:
+            formal.irgen()
         
 class FuncHeader(Node):
     def __init__(self, id, formal_list, ret_type):
@@ -301,6 +351,17 @@ class FuncHeader(Node):
         self.id = id
         self.formal_list = formal_list  # a list of formal
         self.ret_type = ret_type
+    
+    def get_formal_type(self):
+        ''' return formal_ir_type_list and formal_type_list
+        '''
+        formal_ir_type_list = []
+        formal_type_list = []
+        for formal in self.formal_list:
+            formal_ir_type, formal_type = formal.get_formal_type()
+            formal_ir_type_list += formal_ir_type
+            formal_type_list += formal_type
+        return formal_ir_type_list, formal_type_list
     
     def irgen(self):
         for formal in self.formal_list:
@@ -312,27 +373,30 @@ class Formal(Node):
         self.id_list = id_list  # a list of strings
         self.vartype = para_type   # type or ArrayType
     
+    def get_formal_type(self):
+        ''' return formal_ir_type_list and formal_type_list
+        '''
+        if isinstance(self.vartype, ArrayType):
+            self.ir_type = Helper.get_ir_type(self.vartype.type, length=self.vartype.length)
+            self.type = 'array'
+        elif self.vartype == 'string':
+            self.ir_type = Helper.get_ir_type(self.vartype, str="formal")
+            self.type = self.vartype
+        else:
+            self.ir_type = Helper.get_ir_type(self.vartype)
+            self.type = self.vartype
+
+        return [self.ir_type] * len(self.id_list), [self.type] * len(self.id_list)
+    
     def irgen(self):
         ''' add ids to symbol table '''
-        for id in self.id_list:
-            # get symbol type and ir_type
-            if isinstance(self.vartype, ArrayType):
-                ir_type = Helper.get_ir_type(self.vartype.type, length=self.vartype.length)
-                self.type = 'array'
-            elif self.vartype == 'string':
-                ir_type = Helper.get_ir_type(self.vartype, str="formal")
-                self.type = self.vartype
-            else:
-                ir_type = Helper.get_ir_type(self.vartype)
-                self.type = self.vartype
-
-            with Node.builder.goto_entry_block():
-                for id in self.id_list:
-                    addr = Node.builder.alloca(ir_type, name=id)
-                    if isinstance(self.vartype, ArrayType): # array
-                        Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
-                    else:
-                        Node.symbol_table.add_symbol(id, self.type, addr)
+        with Node.builder.goto_entry_block():
+            for id in self.id_list:
+                addr = Node.builder.alloca(self.ir_type, name=id)
+                if isinstance(self.vartype, ArrayType): # array
+                    Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
+                else:
+                    Node.symbol_table.add_symbol(id, self.type, addr)
 
 class ArrayType(Node):
     def __init__(self,length,low_bound, type):
@@ -345,6 +409,10 @@ class Compound(Node):
     def __init__(self,stmt_list):
         super().__init__()
         self.stmt_list = stmt_list
+    
+    def irgen(self):
+        for stmt in self.stmt_list:
+            stmt.irgen()
 
 class LabelStmt(Node):
     def __init__(self,id,non_label_stmt):
@@ -425,17 +493,18 @@ class Call(Node):
                 self.type = 'real'
                 self.ir_var = Node.builder.sitofp(self.exp_list[0].ir_var, Helper.base_type['real'])
             else:
-                raise Exception("unsopported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
+                raise Exception("unsupported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
         else:
             func = Node.symbol_table.get_symbol(self.id)
-            formal_list = list(func['formal_list'].values())
+            assert func['type'] == 'function'
+            formal_list = func['formal_list']
             self.type = func['ret_type']
             # check arguments number
             if len(formal_list) != len(self.exp_list):
-                raise Exception("%s() takes %d positional arguments but %d were given." % (self.id, len(formal_list)), len(self.exp_list)))
+                raise Exception("%s() takes %d positional arguments but %d were given." % (self.id, len(formal_list)), len(self.exp_list))
             # check arguments type
             for i in range(len(self.exp_list)):
-                if self.exp_list.type != formal_list[i]['type']:
+                if self.exp_list[i].type != formal_list[i]:
                     raise Exception("%s() gets wrong parameter type." % self.type)
             # pass all check points
             self.ir_var = Node.builder.call(func['addr'], [exp.ir_var for exp in self.exp_list])
@@ -525,7 +594,7 @@ class BinExp(Node):
                     self.ir_var = Node.builder.sdiv(self.exp1.ir_var, self.exp2.ir_var)
                 elif self.operator == '%':
                     self.ir_var = Node.builder.srem(self.exp1.ir_var, self.exp2.ir_var)
-            elif self.operator == 'real':
+            elif self.type == 'real':
                 if self.operator == '+':
                     self.ir_var = Node.builder.fadd(self.exp1.ir_var, self.exp2.ir_var)
                 elif self.operator == '-':
