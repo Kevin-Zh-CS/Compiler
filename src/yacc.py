@@ -20,6 +20,7 @@ class Parser:
 
         Node.module = self.module
         Node.builder = self.builder
+        Node.main_func = main_func
         # # Declare symbol_table
         # self.symbol_table = None
         # Init AST classes
@@ -412,7 +413,7 @@ class Parser:
 if __name__ == '__main__':
     parser = Parser()
 
-    fin = open("/Users/xy/Compiler/src/test.txt")
+    fin = open("/Users/xy/Compiler/src/test_sample.txt")
     root = parser.parse(fin.read().lower())
     fin.close()
     # root = parser.parse('''program sample;
@@ -425,8 +426,6 @@ if __name__ == '__main__':
     #                     end.'''.lower())
     root.irgen()
     print(type(root))
-    print(root.module)
-
     print('=== LLVM IR')
     print(root.module)
 

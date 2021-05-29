@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from llvmlite.ir.types import ArrayType
+from llvmlite.ir.types import ArrayType, IntType
 
 from lexer import Lexer
 import llvmlite.ir as ir
@@ -59,6 +59,9 @@ class Helper():
                 else:
                     value = var
             # value = int(eval(var.capitalize())) if type == 'bool' else var
+        elif ir_type == ir.IntType(8) and isinstance(var, str):
+            # convert char to int
+            value = ord(var)
         else:
             value = var
         ir_var = ir.Constant(ir_type, value)
@@ -67,17 +70,8 @@ class Helper():
 
 class SymbolTable(object):
 
-
     def __init__(self):
         self.global_table = {}
-        # self.func_table = {}
-        # self.scope_table = []   # each item stores symbols' id for a single scope
-        # self.var_table = {}
-        # self.fn_table = {}
-        # self.scope_var = {}
-        # self.scope_fn = {}
-        # self.type_table = {}
-        # self.scope_type = {}
         self.scope_table = [[]]   # each item stores symbols' id for a single scope
     
     def open_scope(self):
@@ -142,6 +136,7 @@ class Node(ABC):
     
     builder  = None
     module = None
+    main_func = None
     symbol_table = SymbolTable()
 
     # @staticmethod
@@ -162,6 +157,7 @@ class Program(Node):
 
     def irgen(self):
         self.body.irgen()
+        Node.builder.ret_void() # end of main block
 
 class Body(Node):
     def __init__(self, block, local_list):
@@ -172,6 +168,12 @@ class Body(Node):
     def irgen(self):
         for local in self.local_list:
             local.irgen()
+        # # create a new block hihi
+        # header_block = Node.main_func.append_basic_block('entry')
+        # # Node.builder = ir.IRBuilder(header_block)
+        # with Node.builder.goto_block(header_block):
+        #     self.block.irgen()
+        #     Node.builder.ret_void()
         self.block.irgen()
 
 

@@ -2,39 +2,18 @@ program sample;
 { ------------------------------------------------------------ }
 const
 PI = 3.1415926;
-RST = False;
-MSG = 'GOOD NIGHT.';
-{ type暂时没有实现 }
 var
-tcase, a, b: Int;
-c: Char = 'a';
-bl: Bool = True;
 r: real;
-{ 我们的程序中string必须初始化 }
-s: String = 'Hello';	{ only support single quote }
-array1: array[5] of char;
-array2: array[2] of int;
 label
-x, t, z;
-{ 数组暂时不支持初始化和动态下标 }
-{str: array[-1..1] of char = ('s', 't', 'r');}
+x;
+
 { ------------------------------ }
 { 返回值暂时只支持int, real, bool, char }
-function gcd(a: Int; b: Int): Int;	{ header }
-{ local declaration }
-function my_mod(a: Int; b: Int): Int;
-begin
-	array2[9] := 1++2;
-	my_mod := a % b
-end;
-{ local declaration end }
-begin
-	gcd := a	{ * no semicolon }
-end;
+
 { ------------------------------ }
 BEGIN 
 { a := Int(c) + Int(num); }
 
-r := 5.0*real((1--4))+2.1
+x: r := 5.0*real((1--4))+PI
 { bl := gcd(a, b) + -5 }
 end.
