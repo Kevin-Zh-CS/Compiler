@@ -1,11 +1,14 @@
 program sample;
 { ------------------------------------------------------------ }
-const
-PI = 3.1415926;
 var
-r: real;
-label
-x;
+tcase, a, b: Int;
+c: Char = 'a';
+r: Real;
+bl: Bool = True;
+{ 我们的程序中string必须初始化 }
+s: String = 'Hello';	{ only support single quote }
+array1: array[5] of char;
+array2: array[2] of bool;
 
 { ------------------------------ }
 { 返回值暂时只支持int, real, bool, char }
@@ -14,6 +17,6 @@ x;
 BEGIN 
 { a := Int(c) + Int(num); }
 
-x: r := 5.0*real((1--4))+PI
+r := 1.0
 { bl := gcd(a, b) + -5 }
 end.

@@ -1,4 +1,3 @@
-from llvmlite import ir
 import llvmlite.binding as llvm
 from ply import yacc
 from lexer import Lexer
@@ -8,25 +7,6 @@ class Parser:
     def __init__(self):
         # Build the lexer
         self.parser = yacc.yacc(module=self)
-
-        # Declare module
-        self.module = ir.Module()
-        # Declare main function
-        func_type = ir.FunctionType(ir.VoidType(), [])
-        main_func = ir.Function(self.module, func_type, "main")
-        block = main_func.append_basic_block()
-        # Declare builder
-        self.builder = ir.IRBuilder(block)
-
-        Node.module = self.module
-        Node.builder = self.builder
-        Node.main_func = main_func
-        # # Declare symbol_table
-        # self.symbol_table = None
-        # Init AST classes
-        # Node.init_nodes((self.builder, self.module, self.symbol_table))
-    
-
     
     def parse(self, input):
         return self.parser.parse(input)
@@ -375,12 +355,6 @@ class Parser:
         '''
         p[0] = UniExp(operator=p[1], exp=p[2])
 
-    # def p_exp_uminus(self, p):
-    #     '''exp : '-' exp %prec UMINUS
-    #            | '+' exp %prec UPLUS
-    #     '''
-    #     p[0] = UniExp(operator=p[1], exp=p[2])
-
     def p_exp4(self, p):
         '''exp : '(' exp ')'
         '''
@@ -411,27 +385,20 @@ class Parser:
         print('Syntax error! Line:', self.lexer.lexer.lineno)
 
 if __name__ == '__main__':
-    parser = Parser()
+    
+    parser = Parser()   # syntax analysis
 
-    fin = open("/Users/xy/Compiler/src/test_sample.txt")
+    fin = open("/Users/xy/Compiler/src/test.txt")
     root = parser.parse(fin.read().lower())
     fin.close()
-    # root = parser.parse('''program sample;
-    #                     { ------------------------------------------------------------ }
-    #                     var
-    #                     i : char;
-    #                     { ------------------------------ }
-    #                     BEGIN 
-    #                     i := not(5.0*(1--4)+2.1 and 123) 
-    #                     end.'''.lower())
-    root.irgen()
-    print(type(root))
+
+    root.irgen()    # intermediate representation generation
+
     print('=== LLVM IR')
     print(root.module)
 
     # Convert textual LLVM IR into in-memory representation.
     llvm_module = llvm.parse_assembly(str(root.module))
-
     tm = llvm.Target.from_default_triple().create_target_machine()
 
     # Compile the module to machine code using MCJIT

@@ -1,136 +1,12 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
-from llvmlite.ir.types import ArrayType, IntType
-
-from lexer import Lexer
 import llvmlite.ir as ir
 import llvmlite.binding as llvm
 
-tokens = Lexer.tokens
+from lexer import Lexer
+from helper import Helper, SymbolTable
 
-class Helper():
-    base_type = {'int': ir.IntType(32),
-                 'real': ir.FloatType(),
-                 'char': ir.IntType(8),
-                 'bool': ir.IntType(1)
-                }
-
-    artimetic_op = ['+', '-', '*', '/', '%']
-    relation_op = ['=', '<>', '<', '>', '<=', '>=']
-    logic_op = ['not', 'and']
-
-    ir_relation_op = {'=': '==',
-                      '<>': '!=',
-                      '<': '<',
-                      '>': '>',
-                      '<=': '<=',
-                      '>=': '>=' 
-                     }
-
-    @staticmethod
-    def get_ir_type(type, length=0, str=None):
-        if str != None:
-            length = len(str)
-        if length == 0:
-            if isinstance(type, ir.Type):
-                return type
-            if type in Helper.base_type:
-                return Helper.base_type[type]
-        else:
-            if type == 'string':
-                return ir.ArrayType(ir.IntType(8), length)
-            else:   # for arrays, 'type' is the type of elements
-                if isinstance(type, ir.Type):
-                    return ir.ArrayType(type, length)
-                if type in Helper.base_type:
-                    return ir.ArrayType(Helper.base_type[type], length)
-                
-        raise Exception("Invalid data type")
-    
-    @staticmethod
-    def get_ir_var(ir_type, var, is_str=0):
-        if is_str:
-            value = bytearray(var.encode("utf-8"))
-        elif ir_type == ir.IntType(1):  # bool
-                if var == 'true':
-                    value = 1
-                elif var == 'false':
-                    value = 0
-                else:
-                    value = var
-            # value = int(eval(var.capitalize())) if type == 'bool' else var
-        elif ir_type == ir.IntType(8) and isinstance(var, str):
-            # convert char to int
-            value = ord(var)
-        else:
-            value = var
-        ir_var = ir.Constant(ir_type, value)
-        return ir_var
-    
-
-class SymbolTable(object):
-
-    def __init__(self):
-        self.global_table = {}
-        self.scope_table = [[]]   # each item stores symbols' id for a single scope
-    
-    def open_scope(self):
-        self.scope_table.append([])
-    
-    def close_scope(self):
-        for id in self.scope_table[-1]:
-            self.global_table[id].pop() # delete from global table
-            if self.global_table[id] == []:
-                self.global_table.pop(id)
-        self.scope_table.pop()  # delete this scope
-    
-    def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
-        # TODO func and proc entry(type)
-        if id in self.scope_table[-1]:
-            if type == 'label':
-                assert addr != None
-                if not self.global_table[id][-1]['addr']:
-                    self.global_table[id][-1]['addr'] = addr
-                else:
-                    raise Exception("label %s reappeared." % id)
-            else:
-                raise Exception("redefine symbol %s!" % id)
-
-        self.scope_table[-1].append(id)
-        self.global_table.setdefault(id, [])    # add an empty list if the symbol is not in the table
-
-        entry = {}
-        entry['type'] = type
-        entry['addr'] = addr
-        if type not in Helper.base_type and type != 'string' and type != 'label':
-            # array, function or procedure
-            if type == 'array':
-                assert length != 0 and ele_type in Helper.base_type
-                entry['ele_type'] = ele_type
-                entry['length'] = length
-                entry['low_bound'] = low_bound
-            elif type == 'function':
-                entry['ret_type'] = ret_type
-                entry['formal_list'] = formal_list
-            elif type == 'procedure':
-                entry['formal_list'] = formal_list
-            else:
-                raise Exception("invalid symbol type")
-
-        self.global_table[id].append(entry)
-    
-    def get_symbol(self, id):
-        id_list = self.global_table.get(id, None)
-        if id_list:
-            return id_list[-1]
-        else:
-            raise Exception("no symbol named \'%s\'!" % id)
-    
-    def get_symbol_type(self, id):
-        return self.get_symbol(id)['type']
-    
-    def get_symbol_addr(self, id):
-        return self.get_symbol(id)['addr']
+tokens = Lexer.tokens    
 
 class Node(ABC):
     
@@ -139,16 +15,6 @@ class Node(ABC):
     main_func = None
     symbol_table = SymbolTable()
 
-    # @staticmethod
-    # def init_nodes(workbase):
-    #     builder, module, symbol_table = workbase
-
-    # @abstractmethod
-    def irgen(self):
-        ''' code generation '''
-        msg = f'irgen method not implemented for {self.__class__.__name__}'
-        raise NotImplementedError(msg)
-
 class Program(Node):
     def __init__(self, name, body):
         super().__init__()
@@ -156,6 +22,22 @@ class Program(Node):
         self.body = body
 
     def irgen(self):
+        # initialize llvm binder
+        llvm.initialize()
+        llvm.initialize_native_target()
+        llvm.initialize_native_asmprinter()
+
+        # Declare module
+        Node.module = ir.Module()
+        # Declare main function
+        func_type = ir.FunctionType(ir.VoidType(), [])
+        main_func = ir.Function(self.module, func_type, self.name)
+        block = main_func.append_basic_block()
+        # Declare builder
+        Node.builder = ir.IRBuilder(block)
+
+        Node.main_func = main_func
+        
         self.body.irgen()
         Node.builder.ret_void() # end of main block
 
@@ -168,12 +50,6 @@ class Body(Node):
     def irgen(self):
         for local in self.local_list:
             local.irgen()
-        # # create a new block hihi
-        # header_block = Node.main_func.append_basic_block('entry')
-        # # Node.builder = ir.IRBuilder(header_block)
-        # with Node.builder.goto_block(header_block):
-        #     self.block.irgen()
-        #     Node.builder.ret_void()
         self.block.irgen()
 
 
@@ -636,7 +512,9 @@ class UniExp(Node):
         '''
         self.exp.irgen()
         if self.operator == 'not':
-            self.type = 'bool'
+            self.type = self.exp.type
+            if self.type != 'int':
+                raise Exception("'not' operator only support int type but %s was given." % self.type)
             self.ir_var = Node.builder.not_(self.exp.ir_var)
         elif self.operator == '+':
             self.type = self.exp.type
@@ -646,7 +524,7 @@ class UniExp(Node):
             if self.type == 'int':
                 self.ir_var = Node.builder.neg(self.exp.ir_var)
             elif self.type == 'real':
-                self.ir_var = Node.builder.fsub(ir.Constant(ir.IntType(32), 0), self.exp.ir_var)
+                self.ir_var = Node.builder.fsub(ir.Constant(ir.FloatType(), 0), self.exp.ir_var)
         
         try:
             assert self.ir_var and self.type    # make sure the assignment is successful            
