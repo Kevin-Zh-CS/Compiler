@@ -57,8 +57,7 @@ class Lexer:
         'EQ', 'NEQ', 'LT', 'GT', 'LEQ', 'GEQ', # relational operators
         'ID',
         'ASSIGN',
-        'RANGE',
-        'COMMENT'
+        'RANGE'
     ]
     tokens += list(reserve_words.values())
 
