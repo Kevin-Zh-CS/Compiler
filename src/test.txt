@@ -1,21 +1,23 @@
 program sample;
 { ------------------------------------------------------------ }
+const
+PI = 3.14159;
 var
 a : int;
 r : real;
+c : char;
 label
 lb;
 
 { ------------------------------ }
 function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
+var
+array1: array[2] of int;
 function my_mod(a: Int; b: Int): Int;
 begin
 	my_mod := a + b
 end;
-var
-array1: array[2] of int;
-c : char;
 { local declaration end }
 begin
     array1[0] := 2;
@@ -51,16 +53,17 @@ lb:    if gcd < 20 then
 
     c := 'a';
 
-    writeln(int(c));
+    writeln(int(c), 1);
 
     repeat
         gcd := gcd + 1
-    until gcd > 33
+    until gcd % 2 = 0
 
 end;
 { ------------------------------ }
 
 BEGIN 
+writeln(PI);
 r := 1.0
 { a := gcd(1, 2) }
 { array1[0] := 'a'; }

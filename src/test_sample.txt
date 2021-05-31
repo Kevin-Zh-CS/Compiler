@@ -46,7 +46,15 @@ lb:    if gcd < 20 then
     1 : gcd := 10086;
     2 : gcd := 210;
     3 : gcd := 345
-    end
+    end;
+    
+    c := 'a';
+
+    writeln(int(c));
+
+    repeat
+        gcd := gcd + 1
+    until gcd % 2 = 0
 
     {goto lb}
 end;

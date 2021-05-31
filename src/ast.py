@@ -108,18 +108,19 @@ class Var(Node):
             ir_type = Helper.get_ir_type(self.vartype)
             self.type = self.vartype
 
-        with Node.builder.goto_entry_block():
-            for id in self.id_list:
-                addr = Node.builder.alloca(ir_type, name=id)
-                if self.exp:  # initialize variable
-                    self.exp.irgen()
-                    Node.builder.store(self.exp.ir_var, addr)  # store value
-                # add to symbol table
-                if isinstance(self.vartype, ArrayType):  # array
-                    Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound,
-                                                 self.vartype.type)
-                else:
-                    Node.symbol_table.add_symbol(id, self.type, addr)
+        for id in self.id_list:
+            addr = ir.GlobalVariable(Node.module, ir_type, name=id+Node.symbol_table.get_symbol_level(id))
+            addr.linkage = 'internal'
+            # addr = Node.builder.alloca(ir_type, name=id)
+            if self.exp:  # initialize variable
+                self.exp.irgen()
+                Node.builder.store(self.exp.ir_var, addr)  # store value
+            # add to symbol table
+            if isinstance(self.vartype, ArrayType):  # array
+                Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound,
+                                                self.vartype.type)
+            else:
+                Node.symbol_table.add_symbol(id, self.type, addr)
 
 class ConstExp(Node):
     def __init__(self, id_list, var):
@@ -129,11 +130,12 @@ class ConstExp(Node):
 
     def irgen(self):
         self.var.irgen()
-        with Node.builder.goto_entry_block():
-            for id in self.id_list:
-                addr = Node.builder.alloca(self.var.ir_type, name=id)
-                Node.builder.store(self.var.ir_var, addr)  # store value
-                Node.symbol_table.add_symbol(id, self.var.type, addr)
+        for id in self.id_list:
+            addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
+            addr.linkage = 'internal'
+            # addr = Node.builder.alloca(self.var.ir_type, name=id)
+            Node.builder.store(self.var.ir_var, addr)  # store value
+            Node.symbol_table.add_symbol(id, self.var.type, addr)
 
 class IdExp(Node):
     def __init__(self, id):
@@ -217,7 +219,9 @@ class LocalHeader(Node):
                 ret_formal = Formal([self.header.id], ret_type)
                 ret_formal.get_formal_type()
                 with Node.builder.goto_entry_block():
-                    addr = Node.builder.alloca(ret_formal.ir_type, name=self.header.id)
+                    addr = ir.GlobalVariable(Node.module, ret_formal.ir_type, name=self.header.id+Node.symbol_table.get_symbol_level(self.header.id))
+                    addr.linkage = 'internal'
+                    # addr = Node.builder.alloca(ret_formal.ir_type, name=self.header.id)
                     if isinstance(ret_formal.ir_type, ArrayType): # array
                         Node.symbol_table.add_symbol(self.header.id, ret_formal.type, addr, ret_formal.vartype.length, ret_formal.vartype.low_bound, ret_formal.vartype.type)
                     else:
@@ -302,7 +306,9 @@ class Formal(Node):
     def irgen(self, ir_var):
         ''' add ids to symbol table '''
         with Node.builder.goto_entry_block():
-            addr = Node.builder.alloca(self.ir_type, name=self.id)
+            addr = ir.GlobalVariable(Node.module, self.ir_type, name=self.id+Node.symbol_table.get_symbol_level(self.id))
+            addr.linkage = 'internal'
+            # addr = Node.builder.alloca(self.ir_type, name=self.id)
             Node.builder.store(ir_var, addr)    # store input parameter to local variable
             if isinstance(self.vartype, ArrayType): # array
                 Node.symbol_table.add_symbol(self.id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
@@ -358,7 +364,6 @@ class Assign(Node):
         # check type
         if self.lvalue.type != self.exp.type:
             raise Exception("unsupported operand type(s) for :=: '%s' and '%s'." % (self.lvalue.type, self.exp.type))
-        # with Node.builder.goto_entry_block(): hihi
         if isinstance(self.lvalue.addr, ir.Argument):   # it's a value instead of ptr
             self.lvalue.addr = self.exp.ir_var
         else:
