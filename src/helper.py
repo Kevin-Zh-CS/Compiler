@@ -66,17 +66,10 @@ class SymbolTable():
     
     def get_symbol_addr(self, id):
         return self.get_symbol(id)['addr']
-    
-    def get_symbol_level(self, id):
-        id_list = self.global_table.get(id, None)
-        if id_list:
-            return '_'+str(len(id_list))
-        else:
-            return '_0'
 
 class Helper():
     base_type = {'int': ir.IntType(32),
-                 'real': ir.FloatType(),
+                 'real': ir.DoubleType(),
                  'char': ir.IntType(8),
                  'bool': ir.IntType(1)
                 }
