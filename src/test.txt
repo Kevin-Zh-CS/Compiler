@@ -9,12 +9,13 @@ lb;
 { ------------------------------ }
 function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
-var
-array1: array[2] of int;
 function my_mod(a: Int; b: Int): Int;
 begin
 	my_mod := a + b
 end;
+var
+array1: array[2] of int;
+c : char;
 { local declaration end }
 begin
     array1[0] := 2;
@@ -48,11 +49,14 @@ lb:    if gcd < 20 then
     3 : gcd := 345
     end;
 
+    c := 'a';
+
+    writeln(int(c));
+
     repeat
         gcd := gcd + 1
     until gcd > 33
 
-    {goto lb}
 end;
 { ------------------------------ }
 

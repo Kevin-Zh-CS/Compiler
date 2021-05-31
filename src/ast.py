@@ -41,7 +41,6 @@ class Node(ABC):
     module = None
     symbol_table = SymbolTable()
 
-
 class Program(Node):
     def __init__(self, name, body):
         super().__init__()
@@ -66,7 +65,6 @@ class Program(Node):
         self.body.irgen()
         Node.builder.ret_void()  # end of main block
 
-
 class Body(Node):
     def __init__(self, block, local_list):
         super().__init__()
@@ -86,7 +84,6 @@ class VarList(Node):
     def irgen(self):
         for var in self.var_list:
             var.irgen()
-
 
 class Var(Node):
     def __init__(self, id_list, vartype, exp):
@@ -124,7 +121,6 @@ class Var(Node):
                 else:
                     Node.symbol_table.add_symbol(id, self.type, addr)
 
-
 class ConstExp(Node):
     def __init__(self, id_list, var):
         super().__init__()
@@ -139,7 +135,6 @@ class ConstExp(Node):
                 Node.builder.store(self.var.ir_var, addr)  # store value
                 Node.symbol_table.add_symbol(id, self.var.type, addr)
 
-
 class IdExp(Node):
     def __init__(self, id):
         super().__init__()
@@ -152,7 +147,6 @@ class IdExp(Node):
             self.ir_var = addr
         else:
             self.ir_var = Node.builder.load(addr)
-
 
 class LiteralVar(Node):
     def __init__(self, var, type):
@@ -169,7 +163,6 @@ class LiteralVar(Node):
             self.ir_type = Helper.get_ir_type(self.type)
             self.ir_var = Helper.get_ir_var(self.ir_type, self.var)
 
-
 class LabelList(Node):
     def __init__(self, label_list):
         super().__init__()
@@ -180,7 +173,6 @@ class LabelList(Node):
             # add to symbol table
             Node.symbol_table.add_symbol(id, 'label', None)
 
-
 class ConstList(Node):
     def __init__(self, const_list):
         super().__init__()
@@ -189,7 +181,6 @@ class ConstList(Node):
     def irgen(self):
         for const_exp in self.const_list:
             const_exp.irgen()
-
 
 class LocalHeader(Node):
     def __init__(self, header, body):
@@ -244,7 +235,6 @@ class LocalHeader(Node):
 
         Node.symbol_table.close_scope()
 
-
 class ProcHeader(Node):
     def __init__(self, id, formal_list):
         super().__init__()
@@ -288,7 +278,6 @@ class FuncHeader(Node):
         for i, formal in enumerate(self.formal_list):
             formal.irgen(func.args[i])
 
-
 class Formal(Node):
     def __init__(self, id, para_type):
         super().__init__()
@@ -320,14 +309,12 @@ class Formal(Node):
             else:
                 Node.symbol_table.add_symbol(self.id, self.type, addr)
 
-
 class ArrayType(Node):
     def __init__(self, length, low_bound, type):
         super().__init__()
         self.length = length
         self.low_bound = low_bound
         self.type = type
-
 
 class Compound(Node):
     def __init__(self, stmt_list):
@@ -337,7 +324,6 @@ class Compound(Node):
     def irgen(self):
         for stmt in self.stmt_list:
             stmt.irgen()
-
 
 class LabelStmt(Node):
     def __init__(self, id, non_label_stmt):
@@ -359,7 +345,6 @@ class LabelStmt(Node):
         # branch to next block
         Node.builder.branch(next_block)
         Node.builder.position_at_start(next_block)
-
 
 class Assign(Node):
     def __init__(self, lvalue, exp):
@@ -399,7 +384,6 @@ class LValue(Node):
             # gep: get element ptr
             self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32), 0), self.exp.ir_var])
 
-
 class Call(Node):
     # include type conversion, e.g., Int(10.1)
     def __init__(self, id, exp_list):
@@ -415,12 +399,20 @@ class Call(Node):
             exp.irgen()
         if self.id in Helper.base_type:
             # type conversion
-            if self.id == 'int' and self.exp_list[0].type == 'real':
+            if len(self.exp_list) != 1:
+                raise Exception("the type conversion function only supports a single parameter.")
+            if self.id == 'int' and self.exp_list[0].type == 'real':    # real -> int
                 self.type = 'int'
                 self.ir_var = Node.builder.fptosi(self.exp_list[0].ir_var, Helper.base_type['int'])
-            elif self.id == 'real' and self.exp_list[0].type == 'int':
+            elif self.id == 'real' and self.exp_list[0].type == 'int':  # int -> real
                 self.type = 'real'
                 self.ir_var = Node.builder.sitofp(self.exp_list[0].ir_var, Helper.base_type['real'])
+            elif self.id == 'int' and self.exp_list[0].type == 'char':  # char -> int
+                self.type = 'int'
+                self.ir_var = Node.builder.sext(self.exp_list[0].ir_var, Helper.base_type['int'])
+            elif self.id == 'char' and self.exp_list[0].type == 'int':  # int -> char
+                self.type = 'char'
+                self.ir_var = Node.builder.trunc(self.exp_list[0].ir_var, Helper.base_type['char'])
             else:
                 raise Exception("unsupported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
         elif self.id in Helper.IO_type:
@@ -440,7 +432,6 @@ class Call(Node):
                     raise Exception("%s() gets wrong parameter type." % self.type)
             # pass all check points
             self.ir_var = Node.builder.call(func['addr'], [exp.ir_var for exp in self.exp_list])
-
 
 class For(Node):
     def __init__(self, id, exp1, direct, exp2, stmt):
@@ -470,7 +461,6 @@ class While(Node):
         Node.builder.cbranch(self.exp.ir_var, while_block, next_block)
         Node.builder.position_at_start(next_block)
 
-
 class Repeat(Node):
     def __init__(self, stmt, exp):
         super().__init__()
@@ -489,7 +479,6 @@ class Repeat(Node):
         Node.builder.cbranch(self.exp.ir_var, next_block, repeat_block)
 
         Node.builder.position_at_start(next_block)
-
 
 class If(Node):
     def __init__(self, exp, stmt, else_stmt):
@@ -538,7 +527,6 @@ class Case(Node):
         
         Node.builder.position_at_start(next_block)
 
-
 class CaseExp(Node):
     def __init__(self, exp, stmt):
         super().__init__()
@@ -547,7 +535,6 @@ class CaseExp(Node):
     
     def irgen(self):
         self.stmt.irgen() 
-
 
 class Goto(Node):
     def __init__(self, id):
@@ -559,7 +546,6 @@ class Goto(Node):
         Node.builder.branch(goto_block)
         next_block = Node.builder.append_basic_block()
         Node.builder.position_at_start(next_block)
-
 
 class BinExp(Node):
     def __init__(self, operator, exp1, exp2):
@@ -622,7 +608,6 @@ class BinExp(Node):
             raise Exception(
                 "unsupported operand type(s) for %s: '%s' and '%s'." % (self.operator, self.exp1.type, self.exp2.type))
 
-
 class UniExp(Node):
     def __init__(self, operator, exp):
         super().__init__()
@@ -653,7 +638,6 @@ class UniExp(Node):
             assert self.ir_var and self.type  # make sure the assignment is successful
         except:
             raise Exception("unsupported operand type(s) for %s: '%s'." % (self.operator, self.exp.type))
-
 
 class Array(Node):
     def __init__(self, id, exp):
