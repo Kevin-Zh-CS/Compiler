@@ -12,7 +12,6 @@ class Node(ABC):
     
     builder  = None
     module = None
-    main_func = None
     symbol_table = SymbolTable()
 
 class Program(Node):
@@ -28,15 +27,13 @@ class Program(Node):
         llvm.initialize_native_asmprinter()
 
         # declare module
-        Node.module = ir.Module()
+        Node.module = ir.Module(__file__)
         # declare main function
         func_type = ir.FunctionType(ir.VoidType(), [])
         main_func = ir.Function(self.module, func_type, self.name)
         block = main_func.append_basic_block()
         # declare builder
         Node.builder = ir.IRBuilder(block)
-
-        Node.main_func = main_func
         
         self.body.irgen()
         Node.builder.ret_void() # end of main block
@@ -254,9 +251,9 @@ class FuncHeader(Node):
             formal.irgen(func.args[i])
 
 class Formal(Node):
-    def __init__(self, id_list, para_type):
+    def __init__(self, id, para_type):
         super().__init__()
-        self.id_list = id_list  # a list of strings
+        self.id = id
         self.vartype = para_type   # type or ArrayType
     
     def get_formal_type(self):
@@ -272,16 +269,17 @@ class Formal(Node):
             self.ir_type = Helper.get_ir_type(self.vartype)
             self.type = self.vartype
 
-        return [self.ir_type] * len(self.id_list), [self.type] * len(self.id_list)
+        return [self.ir_type], [self.type]
     
     def irgen(self, ir_var):
         ''' add ids to symbol table '''
         with Node.builder.goto_entry_block():
-            for id in self.id_list:
-                if isinstance(self.vartype, ArrayType): # array
-                    Node.symbol_table.add_symbol(id, self.type, ir_var, self.vartype.length, self.vartype.low_bound, self.vartype.type)
-                else:
-                    Node.symbol_table.add_symbol(id, self.type, ir_var)
+            addr = Node.builder.alloca(self.ir_type, name=self.id)
+            Node.builder.store(ir_var, addr)    # store input parameter to local variable
+            if isinstance(self.vartype, ArrayType): # array
+                Node.symbol_table.add_symbol(self.id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)
+            else:
+                Node.symbol_table.add_symbol(self.id, self.type, addr)
 
 class ArrayType(Node):
     def __init__(self,length,low_bound, type):
@@ -484,8 +482,7 @@ class CaseExp(Node):
         self.stmt = stmt
     
     def irgen(self):
-        self.stmt.irgen()
-        
+        self.stmt.irgen() 
 
 class Goto(Node):
     def __init__(self, id):

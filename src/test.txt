@@ -3,14 +3,14 @@ program sample;
 var
 a : int;
 r : real;
-label
-lb;
 
 { ------------------------------ }
 function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
 var
 array1: array[2] of int;
+label
+lb;
 function my_mod(a: Int; b: Int): Int;
 begin
 	my_mod := a + b
@@ -39,13 +39,6 @@ lb:    if gcd < 20 then
     begin
         gcd := gcd + 1;
         goto lb
-    end;
-
-    gcd := 1;
-    case gcd of
-    1 : gcd := 10086;
-    2 : gcd := 210;
-    3 : gcd := 345
     end
 
     {goto lb}

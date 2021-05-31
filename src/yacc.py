@@ -142,9 +142,9 @@ class Parser:
         p[0] = p[2]
     
     def p_formal(self, p):
-        '''formal : id_list ':' vartype
+        '''formal : ID ':' vartype
         '''
-        p[0] = Formal(id_list=p[1], para_type=p[3])
+        p[0] = Formal(id=p[1], para_type=p[3])
     
     def p_semicolon_formal_list(self, p):
         '''semicolon_formal_list : semicolon_formal_list ';' formal
