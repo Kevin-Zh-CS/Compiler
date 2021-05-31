@@ -415,5 +415,5 @@ if __name__ == '__main__':
         cfunc = CFUNCTYPE(c_int, c_int)(cfptr)
 
         # Now 'cfunc' is an actual callable we can invoke
-        res = cfunc(24, 11)
+        res = cfunc(2, 11)
         print('The result is', res)
