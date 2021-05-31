@@ -3,6 +3,7 @@ program sample;
 var
 a : int;
 r : real;
+c : char = 'a';
 label
 lb;
 
@@ -54,7 +55,12 @@ lb:    if gcd < 20 then
 
     repeat
         gcd := gcd + 1
-    until gcd % 2 = 0
+    until gcd % 2 = 0;
+
+    for a:=5 downto 0 do
+        writeln(a);
+
+    writeln('PI =', ' ', '3.14159')
 
     {goto lb}
 end;

@@ -386,7 +386,7 @@ if __name__ == '__main__':
     
     parser = Parser()   # syntax analysis
 
-    fin = open("/Users/xy/Compiler/src/test.txt")
+    fin = open("/Users/xy/Compiler/src/test_sample.txt")
     root = parser.parse(fin.read().lower())
     fin.close()
 
