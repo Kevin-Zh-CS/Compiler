@@ -133,6 +133,7 @@ class ConstExp(Node):
         for id in self.id_list:
             addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
             addr.linkage = 'internal'
+            addr.global_constant = True # declare as a constant
             # addr = Node.builder.alloca(self.var.ir_type, name=id)
             Node.builder.store(self.var.ir_var, addr)  # store value
             Node.symbol_table.add_symbol(id, self.var.type, addr)
@@ -446,6 +447,36 @@ class For(Node):
         self.direct = direct
         self.exp2 = exp2
         self.stmt = stmt
+    
+    def irgen(self):
+        for_block = Node.builder.append_basic_block()
+        next_block = Node.builder.append_basic_block()
+
+        assign_stmt = Assign(lvalue=LValue(self.id, None), exp=self.exp1)
+        assign_stmt.irgen()
+        self.exp2.irgen()
+        right_ir_var = self.exp2.ir_var
+
+        if self.direct == 0:    # increase
+            relat_op = '<='
+            inc_dec_var = ir.Constant(ir.IntType(32), 1)
+        else:   # decrease
+            relat_op = '>='
+            inc_dec_var = ir.Constant(ir.IntType(32), -1)
+
+        # left_ir_var = Node.builder.load(Node.symbol_table.get_symbol_addr(self.id))
+        left_ir_var = self.exp1.ir_var
+        cond = Node.builder.icmp_signed(relat_op, left_ir_var, right_ir_var)
+        Node.builder.cbranch(cond, for_block, next_block)
+        Node.builder.position_at_start(for_block)
+        self.stmt.irgen()
+        # increase or decrease iteration variable
+        left_ir_var = Node.builder.load(Node.symbol_table.get_symbol_addr(self.id)) # current value of iteration variable
+        Node.builder.store(Node.builder.add(left_ir_var, inc_dec_var), Node.symbol_table.get_symbol_addr(self.id))  # inc of dec
+        left_ir_var = Node.builder.load(Node.symbol_table.get_symbol_addr(self.id)) # value after inc/dec
+        cond = Node.builder.icmp_signed(relat_op, left_ir_var, right_ir_var)
+        Node.builder.cbranch(cond, for_block, next_block)
+        Node.builder.position_at_start(next_block)
 
 class While(Node):
     def __init__(self, exp, stmt):
