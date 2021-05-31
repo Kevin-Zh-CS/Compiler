@@ -63,7 +63,7 @@ Rule 48    for_stmt -> FOR ID ASSIGN exp direction exp DO stmt
 Rule 49    direction -> DOWNTO
 Rule 50    direction -> TO
 Rule 51    while_stmt -> WHILE exp DO stmt
-Rule 52    repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp
+Rule 52    repeat_stmt -> REPEAT stmt UNTIL exp
 Rule 53    case_stmt -> CASE exp OF case_exp_list END
 Rule 54    case_exp_list -> case_exp_list ; case_exp
 Rule 55    case_exp_list -> case_exp
@@ -207,7 +207,7 @@ non_label_stmt       : 36 37
 program              : 0
 repeat_stmt          : 43
 semicolon_formal_list : 23 25
-semicolon_stmt_list  : 34 52 58
+semicolon_stmt_list  : 34 58
 stmt                 : 34 48 51 52 56 58 64 65
 var                  : 9 10
 var_list             : 5 9
@@ -356,7 +356,7 @@ state 11
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -734,7 +734,7 @@ state 34
 
 state 35
 
-    (52) repeat_stmt -> REPEAT . stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> REPEAT . stmt UNTIL exp
     (36) stmt -> . ID : non_label_stmt
     (37) stmt -> . non_label_stmt
     (38) non_label_stmt -> . assign_stmt
@@ -753,7 +753,7 @@ state 35
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -1073,7 +1073,6 @@ state 56
 
     END             reduce using rule 35 (semicolon_stmt_list -> empty .)
     ;               reduce using rule 35 (semicolon_stmt_list -> empty .)
-    UNTIL           reduce using rule 35 (semicolon_stmt_list -> empty .)
 
 
 state 57
@@ -1095,7 +1094,7 @@ state 57
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -1971,16 +1970,10 @@ state 76
 
 state 77
 
-    (52) repeat_stmt -> REPEAT stmt . semicolon_stmt_list UNTIL exp
-    (34) semicolon_stmt_list -> . semicolon_stmt_list ; stmt
-    (35) semicolon_stmt_list -> . empty
-    (95) empty -> .
+    (52) repeat_stmt -> REPEAT stmt . UNTIL exp
 
-    UNTIL           reduce using rule 95 (empty -> .)
-    ;               reduce using rule 95 (empty -> .)
+    UNTIL           shift and go to state 121
 
-    semicolon_stmt_list            shift and go to state 121
-    empty                          shift and go to state 56
 
 state 78
 
@@ -2195,7 +2188,7 @@ state 92
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -2516,7 +2509,7 @@ state 101
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -3658,7 +3651,7 @@ state 120
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -3703,12 +3696,65 @@ state 120
 
 state 121
 
-    (52) repeat_stmt -> REPEAT stmt semicolon_stmt_list . UNTIL exp
-    (34) semicolon_stmt_list -> semicolon_stmt_list . ; stmt
+    (52) repeat_stmt -> REPEAT stmt UNTIL . exp
+    (74) exp -> . call_stmt
+    (75) exp -> . exp + exp
+    (76) exp -> . exp - exp
+    (77) exp -> . exp * exp
+    (78) exp -> . exp / exp
+    (79) exp -> . exp % exp
+    (80) exp -> . exp EQ exp
+    (81) exp -> . exp NEQ exp
+    (82) exp -> . exp LT exp
+    (83) exp -> . exp GT exp
+    (84) exp -> . exp LEQ exp
+    (85) exp -> . exp GEQ exp
+    (86) exp -> . exp AND exp
+    (87) exp -> . exp OR exp
+    (88) exp -> . NOT exp
+    (89) exp -> . - exp
+    (90) exp -> . + exp
+    (91) exp -> . ( exp )
+    (92) exp -> . ID
+    (93) exp -> . literal
+    (94) exp -> . ID [ exp ]
+    (59) call_stmt -> . ID ( exp comma_exp_list )
+    (60) call_stmt -> . vartype ( exp )
+    (61) call_stmt -> . ID ( )
+    (69) literal -> . LITERAL_INT
+    (70) literal -> . LITERAL_REAL
+    (71) literal -> . LITERAL_BOOL
+    (72) literal -> . LITERAL_CHAR
+    (73) literal -> . LITERAL_STRING
+    (27) vartype -> . INT
+    (28) vartype -> . REAL
+    (29) vartype -> . BOOL
+    (30) vartype -> . CHAR
+    (31) vartype -> . STRING
+    (32) vartype -> . ARRAY [ LITERAL_INT ] OF vartype
+    (33) vartype -> . ARRAY [ LITERAL_INT RANGE LITERAL_INT ] OF vartype
 
-    UNTIL           shift and go to state 157
-    ;               shift and go to state 92
+    NOT             shift and go to state 67
+    -               shift and go to state 66
+    +               shift and go to state 65
+    (               shift and go to state 68
+    ID              shift and go to state 69
+    LITERAL_INT     shift and go to state 71
+    LITERAL_REAL    shift and go to state 72
+    LITERAL_BOOL    shift and go to state 73
+    LITERAL_CHAR    shift and go to state 74
+    LITERAL_STRING  shift and go to state 75
+    INT             shift and go to state 38
+    REAL            shift and go to state 39
+    BOOL            shift and go to state 40
+    CHAR            shift and go to state 41
+    STRING          shift and go to state 42
+    ARRAY           shift and go to state 43
 
+    exp                            shift and go to state 157
+    call_stmt                      shift and go to state 64
+    literal                        shift and go to state 70
+    vartype                        shift and go to state 31
 
 state 122
 
@@ -3875,7 +3921,6 @@ state 134
 
     END             reduce using rule 34 (semicolon_stmt_list -> semicolon_stmt_list ; stmt .)
     ;               reduce using rule 34 (semicolon_stmt_list -> semicolon_stmt_list ; stmt .)
-    UNTIL           reduce using rule 34 (semicolon_stmt_list -> semicolon_stmt_list ; stmt .)
 
 
 state 135
@@ -4833,65 +4878,39 @@ state 156
 
 state 157
 
-    (52) repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL . exp
-    (74) exp -> . call_stmt
-    (75) exp -> . exp + exp
-    (76) exp -> . exp - exp
-    (77) exp -> . exp * exp
-    (78) exp -> . exp / exp
-    (79) exp -> . exp % exp
-    (80) exp -> . exp EQ exp
-    (81) exp -> . exp NEQ exp
-    (82) exp -> . exp LT exp
-    (83) exp -> . exp GT exp
-    (84) exp -> . exp LEQ exp
-    (85) exp -> . exp GEQ exp
-    (86) exp -> . exp AND exp
-    (87) exp -> . exp OR exp
-    (88) exp -> . NOT exp
-    (89) exp -> . - exp
-    (90) exp -> . + exp
-    (91) exp -> . ( exp )
-    (92) exp -> . ID
-    (93) exp -> . literal
-    (94) exp -> . ID [ exp ]
-    (59) call_stmt -> . ID ( exp comma_exp_list )
-    (60) call_stmt -> . vartype ( exp )
-    (61) call_stmt -> . ID ( )
-    (69) literal -> . LITERAL_INT
-    (70) literal -> . LITERAL_REAL
-    (71) literal -> . LITERAL_BOOL
-    (72) literal -> . LITERAL_CHAR
-    (73) literal -> . LITERAL_STRING
-    (27) vartype -> . INT
-    (28) vartype -> . REAL
-    (29) vartype -> . BOOL
-    (30) vartype -> . CHAR
-    (31) vartype -> . STRING
-    (32) vartype -> . ARRAY [ LITERAL_INT ] OF vartype
-    (33) vartype -> . ARRAY [ LITERAL_INT RANGE LITERAL_INT ] OF vartype
+    (52) repeat_stmt -> REPEAT stmt UNTIL exp .
+    (75) exp -> exp . + exp
+    (76) exp -> exp . - exp
+    (77) exp -> exp . * exp
+    (78) exp -> exp . / exp
+    (79) exp -> exp . % exp
+    (80) exp -> exp . EQ exp
+    (81) exp -> exp . NEQ exp
+    (82) exp -> exp . LT exp
+    (83) exp -> exp . GT exp
+    (84) exp -> exp . LEQ exp
+    (85) exp -> exp . GEQ exp
+    (86) exp -> exp . AND exp
+    (87) exp -> exp . OR exp
 
-    NOT             shift and go to state 67
-    -               shift and go to state 66
-    +               shift and go to state 65
-    (               shift and go to state 68
-    ID              shift and go to state 69
-    LITERAL_INT     shift and go to state 71
-    LITERAL_REAL    shift and go to state 72
-    LITERAL_BOOL    shift and go to state 73
-    LITERAL_CHAR    shift and go to state 74
-    LITERAL_STRING  shift and go to state 75
-    INT             shift and go to state 38
-    REAL            shift and go to state 39
-    BOOL            shift and go to state 40
-    CHAR            shift and go to state 41
-    STRING          shift and go to state 42
-    ARRAY           shift and go to state 43
+    END             reduce using rule 52 (repeat_stmt -> REPEAT stmt UNTIL exp .)
+    ;               reduce using rule 52 (repeat_stmt -> REPEAT stmt UNTIL exp .)
+    UNTIL           reduce using rule 52 (repeat_stmt -> REPEAT stmt UNTIL exp .)
+    ELSE            reduce using rule 52 (repeat_stmt -> REPEAT stmt UNTIL exp .)
+    +               shift and go to state 102
+    -               shift and go to state 103
+    *               shift and go to state 104
+    /               shift and go to state 105
+    %               shift and go to state 106
+    EQ              shift and go to state 107
+    NEQ             shift and go to state 108
+    LT              shift and go to state 109
+    GT              shift and go to state 110
+    LEQ             shift and go to state 111
+    GEQ             shift and go to state 112
+    AND             shift and go to state 113
+    OR              shift and go to state 114
 
-    exp                            shift and go to state 182
-    call_stmt                      shift and go to state 64
-    literal                        shift and go to state 70
-    vartype                        shift and go to state 31
 
 state 158
 
@@ -4910,7 +4929,7 @@ state 158
     (86) exp -> exp . AND exp
     (87) exp -> exp . OR exp
 
-    :               shift and go to state 183
+    :               shift and go to state 182
     +               shift and go to state 102
     -               shift and go to state 103
     *               shift and go to state 104
@@ -4931,8 +4950,8 @@ state 159
     (53) case_stmt -> CASE exp OF case_exp_list . END
     (54) case_exp_list -> case_exp_list . ; case_exp
 
-    END             shift and go to state 184
-    ;               shift and go to state 185
+    END             shift and go to state 183
+    ;               shift and go to state 184
 
 
 state 160
@@ -4947,14 +4966,14 @@ state 161
 
     (32) vartype -> ARRAY [ LITERAL_INT ] . OF vartype
 
-    OF              shift and go to state 186
+    OF              shift and go to state 185
 
 
 state 162
 
     (33) vartype -> ARRAY [ LITERAL_INT RANGE . LITERAL_INT ] OF vartype
 
-    LITERAL_INT     shift and go to state 187
+    LITERAL_INT     shift and go to state 186
 
 
 state 163
@@ -5028,7 +5047,7 @@ state 164
     ARRAY           shift and go to state 43
 
     vartype                        shift and go to state 31
-    exp                            shift and go to state 188
+    exp                            shift and go to state 187
     call_stmt                      shift and go to state 64
     literal                        shift and go to state 70
 
@@ -5073,7 +5092,7 @@ state 167
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    vartype                        shift and go to state 189
+    vartype                        shift and go to state 188
 
 state 168
 
@@ -5088,7 +5107,7 @@ state 169
     (25) semicolon_formal_list -> semicolon_formal_list . ; formal
 
     )               reduce using rule 23 (formal_list -> formal semicolon_formal_list .)
-    ;               shift and go to state 190
+    ;               shift and go to state 189
 
 
 state 170
@@ -5103,7 +5122,7 @@ state 171
 
     (21) header -> FUNCTION ID ( formal_list ) . : vartype
 
-    :               shift and go to state 191
+    :               shift and go to state 190
 
 
 state 172
@@ -5124,7 +5143,7 @@ state 172
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    vartype                        shift and go to state 192
+    vartype                        shift and go to state 191
 
 state 173
 
@@ -5215,7 +5234,7 @@ state 174
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    exp                            shift and go to state 193
+    exp                            shift and go to state 192
     call_stmt                      shift and go to state 64
     literal                        shift and go to state 70
     vartype                        shift and go to state 31
@@ -5277,7 +5296,7 @@ state 175
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    exp                            shift and go to state 194
+    exp                            shift and go to state 193
     call_stmt                      shift and go to state 64
     literal                        shift and go to state 70
     vartype                        shift and go to state 31
@@ -5357,7 +5376,7 @@ state 179
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -5386,7 +5405,7 @@ state 179
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    stmt                           shift and go to state 195
+    stmt                           shift and go to state 194
     non_label_stmt                 shift and go to state 20
     assign_stmt                    shift and go to state 21
     call_stmt                      shift and go to state 22
@@ -5444,42 +5463,6 @@ state 181
 
 state 182
 
-    (52) repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp .
-    (75) exp -> exp . + exp
-    (76) exp -> exp . - exp
-    (77) exp -> exp . * exp
-    (78) exp -> exp . / exp
-    (79) exp -> exp . % exp
-    (80) exp -> exp . EQ exp
-    (81) exp -> exp . NEQ exp
-    (82) exp -> exp . LT exp
-    (83) exp -> exp . GT exp
-    (84) exp -> exp . LEQ exp
-    (85) exp -> exp . GEQ exp
-    (86) exp -> exp . AND exp
-    (87) exp -> exp . OR exp
-
-    END             reduce using rule 52 (repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp .)
-    ;               reduce using rule 52 (repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp .)
-    UNTIL           reduce using rule 52 (repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp .)
-    ELSE            reduce using rule 52 (repeat_stmt -> REPEAT stmt semicolon_stmt_list UNTIL exp .)
-    +               shift and go to state 102
-    -               shift and go to state 103
-    *               shift and go to state 104
-    /               shift and go to state 105
-    %               shift and go to state 106
-    EQ              shift and go to state 107
-    NEQ             shift and go to state 108
-    LT              shift and go to state 109
-    GT              shift and go to state 110
-    LEQ             shift and go to state 111
-    GEQ             shift and go to state 112
-    AND             shift and go to state 113
-    OR              shift and go to state 114
-
-
-state 183
-
     (56) case_exp -> exp : . stmt
     (36) stmt -> . ID : non_label_stmt
     (37) stmt -> . non_label_stmt
@@ -5499,7 +5482,7 @@ state 183
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -5528,7 +5511,7 @@ state 183
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    stmt                           shift and go to state 196
+    stmt                           shift and go to state 195
     non_label_stmt                 shift and go to state 20
     assign_stmt                    shift and go to state 21
     call_stmt                      shift and go to state 22
@@ -5542,7 +5525,7 @@ state 183
     lvalue                         shift and go to state 30
     vartype                        shift and go to state 31
 
-state 184
+state 183
 
     (53) case_stmt -> CASE exp OF case_exp_list END .
 
@@ -5552,7 +5535,7 @@ state 184
     ELSE            reduce using rule 53 (case_stmt -> CASE exp OF case_exp_list END .)
 
 
-state 185
+state 184
 
     (54) case_exp_list -> case_exp_list ; . case_exp
     (56) case_exp -> . exp : stmt
@@ -5610,13 +5593,13 @@ state 185
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    case_exp                       shift and go to state 197
+    case_exp                       shift and go to state 196
     exp                            shift and go to state 158
     call_stmt                      shift and go to state 64
     literal                        shift and go to state 70
     vartype                        shift and go to state 31
 
-state 186
+state 185
 
     (32) vartype -> ARRAY [ LITERAL_INT ] OF . vartype
     (27) vartype -> . INT
@@ -5634,16 +5617,16 @@ state 186
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    vartype                        shift and go to state 198
+    vartype                        shift and go to state 197
 
-state 187
+state 186
 
     (33) vartype -> ARRAY [ LITERAL_INT RANGE LITERAL_INT . ] OF vartype
 
-    ]               shift and go to state 199
+    ]               shift and go to state 198
 
 
-state 188
+state 187
 
     (12) var -> id_list : vartype EQ exp . ;
     (75) exp -> exp . + exp
@@ -5660,7 +5643,7 @@ state 188
     (86) exp -> exp . AND exp
     (87) exp -> exp . OR exp
 
-    ;               shift and go to state 200
+    ;               shift and go to state 199
     +               shift and go to state 102
     -               shift and go to state 103
     *               shift and go to state 104
@@ -5676,7 +5659,7 @@ state 188
     OR              shift and go to state 114
 
 
-state 189
+state 188
 
     (24) formal -> ID : vartype .
 
@@ -5684,16 +5667,16 @@ state 189
     )               reduce using rule 24 (formal -> ID : vartype .)
 
 
-state 190
+state 189
 
     (25) semicolon_formal_list -> semicolon_formal_list ; . formal
     (24) formal -> . ID : vartype
 
     ID              shift and go to state 128
 
-    formal                         shift and go to state 201
+    formal                         shift and go to state 200
 
-state 191
+state 190
 
     (21) header -> FUNCTION ID ( formal_list ) : . vartype
     (27) vartype -> . INT
@@ -5711,16 +5694,16 @@ state 191
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    vartype                        shift and go to state 202
+    vartype                        shift and go to state 201
 
-state 192
+state 191
 
     (22) header -> FUNCTION ID ( ) : vartype .
 
     ;               reduce using rule 22 (header -> FUNCTION ID ( ) : vartype .)
 
 
-state 193
+state 192
 
     (62) comma_exp_list -> comma_exp_list , exp .
     (75) exp -> exp . + exp
@@ -5754,7 +5737,7 @@ state 193
     OR              shift and go to state 114
 
 
-state 194
+state 193
 
     (48) for_stmt -> FOR ID ASSIGN exp direction exp . DO stmt
     (75) exp -> exp . + exp
@@ -5771,7 +5754,7 @@ state 194
     (86) exp -> exp . AND exp
     (87) exp -> exp . OR exp
 
-    DO              shift and go to state 203
+    DO              shift and go to state 202
     +               shift and go to state 102
     -               shift and go to state 103
     *               shift and go to state 104
@@ -5787,7 +5770,7 @@ state 194
     OR              shift and go to state 114
 
 
-state 195
+state 194
 
     (65) else_stmt -> ELSE stmt .
 
@@ -5797,7 +5780,7 @@ state 195
     ELSE            reduce using rule 65 (else_stmt -> ELSE stmt .)
 
 
-state 196
+state 195
 
     (56) case_exp -> exp : stmt .
 
@@ -5805,7 +5788,7 @@ state 196
     ;               reduce using rule 56 (case_exp -> exp : stmt .)
 
 
-state 197
+state 196
 
     (54) case_exp_list -> case_exp_list ; case_exp .
 
@@ -5813,7 +5796,7 @@ state 197
     ;               reduce using rule 54 (case_exp_list -> case_exp_list ; case_exp .)
 
 
-state 198
+state 197
 
     (32) vartype -> ARRAY [ LITERAL_INT ] OF vartype .
 
@@ -5823,14 +5806,14 @@ state 198
     )               reduce using rule 32 (vartype -> ARRAY [ LITERAL_INT ] OF vartype .)
 
 
-state 199
+state 198
 
     (33) vartype -> ARRAY [ LITERAL_INT RANGE LITERAL_INT ] . OF vartype
 
-    OF              shift and go to state 204
+    OF              shift and go to state 203
 
 
-state 200
+state 199
 
     (12) var -> id_list : vartype EQ exp ; .
 
@@ -5843,7 +5826,7 @@ state 200
     FUNCTION        reduce using rule 12 (var -> id_list : vartype EQ exp ; .)
 
 
-state 201
+state 200
 
     (25) semicolon_formal_list -> semicolon_formal_list ; formal .
 
@@ -5851,14 +5834,14 @@ state 201
     )               reduce using rule 25 (semicolon_formal_list -> semicolon_formal_list ; formal .)
 
 
-state 202
+state 201
 
     (21) header -> FUNCTION ID ( formal_list ) : vartype .
 
     ;               reduce using rule 21 (header -> FUNCTION ID ( formal_list ) : vartype .)
 
 
-state 203
+state 202
 
     (48) for_stmt -> FOR ID ASSIGN exp direction exp DO . stmt
     (36) stmt -> . ID : non_label_stmt
@@ -5879,7 +5862,7 @@ state 203
     (48) for_stmt -> . FOR ID ASSIGN exp direction exp DO stmt
     (64) if_stmt -> . IF exp THEN stmt else_stmt
     (51) while_stmt -> . WHILE exp DO stmt
-    (52) repeat_stmt -> . REPEAT stmt semicolon_stmt_list UNTIL exp
+    (52) repeat_stmt -> . REPEAT stmt UNTIL exp
     (53) case_stmt -> . CASE exp OF case_exp_list END
     (57) goto_stmt -> . GOTO ID
     (58) compound_stmt -> . BEGIN stmt semicolon_stmt_list END
@@ -5908,7 +5891,7 @@ state 203
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    stmt                           shift and go to state 205
+    stmt                           shift and go to state 204
     non_label_stmt                 shift and go to state 20
     assign_stmt                    shift and go to state 21
     call_stmt                      shift and go to state 22
@@ -5922,7 +5905,7 @@ state 203
     lvalue                         shift and go to state 30
     vartype                        shift and go to state 31
 
-state 204
+state 203
 
     (33) vartype -> ARRAY [ LITERAL_INT RANGE LITERAL_INT ] OF . vartype
     (27) vartype -> . INT
@@ -5940,9 +5923,9 @@ state 204
     STRING          shift and go to state 42
     ARRAY           shift and go to state 43
 
-    vartype                        shift and go to state 206
+    vartype                        shift and go to state 205
 
-state 205
+state 204
 
     (48) for_stmt -> FOR ID ASSIGN exp direction exp DO stmt .
 
@@ -5952,7 +5935,7 @@ state 205
     ELSE            reduce using rule 48 (for_stmt -> FOR ID ASSIGN exp direction exp DO stmt .)
 
 
-state 206
+state 205
 
     (33) vartype -> ARRAY [ LITERAL_INT RANGE LITERAL_INT ] OF vartype .
 

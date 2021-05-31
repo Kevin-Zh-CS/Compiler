@@ -443,10 +443,23 @@ class While(Node):
 
 
 class Repeat(Node):
-    def __init__(self, stmt_list, exp):
+    def __init__(self, stmt, exp):
         super().__init__()
-        self.stmt_list = stmt_list
+        self.stmt = stmt
         self.exp = exp
+    
+    def irgen(self):
+        repeat_block = Node.builder.append_basic_block()
+        next_block = Node.builder.append_basic_block()
+
+        Node.builder.branch(repeat_block)
+        Node.builder.position_at_start(repeat_block)
+        self.stmt.irgen()   # generate statements in repeat body
+        self.exp.irgen()
+        # jump to either part depending on the exp value
+        Node.builder.cbranch(self.exp.ir_var, next_block, repeat_block)
+
+        Node.builder.position_at_start(next_block)
 
 
 class If(Node):

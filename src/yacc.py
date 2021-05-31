@@ -230,10 +230,9 @@ class Parser:
         p[0] = While(exp=p[2], stmt=p[4])
     
     def p_repeat_stmt(self, p):
-        '''repeat_stmt : REPEAT stmt semicolon_stmt_list UNTIL exp
+        '''repeat_stmt : REPEAT stmt UNTIL exp
         '''
-        p[3].insert(0, p[2])
-        p[0] = Repeat(stmt_list=p[3], exp=p[5])
+        p[0] = Repeat(stmt=p[2], exp=p[4])
     
     def p_case_stmt(self, p):
         '''case_stmt : CASE exp OF case_exp_list END
