@@ -16,20 +16,20 @@ class SymbolTable():
                 self.global_table.pop(id)
         self.scope_table.pop()  # delete this scope
     
-    def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
-        if id in self.scope_table[-1]:
-            if type == 'label':
-                assert addr != None
-                if not self.global_table[id][-1]['addr']:
-                    self.global_table[id][-1]['addr'] = addr
-                    return
-                else:
-                    raise Exception("label %s reappeared." % id)
+    def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):
+        if type == 'label' and addr:    # use label to mark a position
+            if self.global_table.get(id, None) == None:
+                raise Exception("label '%s' not defined." % id)
+            if not self.global_table[id][-1]['addr']:
+                self.global_table[id][-1]['addr'] = addr
+                return
             else:
-                raise Exception("redefine symbol %s." % id)
+                raise Exception("label %s reappeared." % id)
+        if id in self.scope_table[-1]:
+            raise Exception("redefine symbol %s." % id)
         
-        if type == 'label' and addr:
-            raise Exception("label '%s' not defined." % id)
+        # if type == 'label' and addr:
+        #     raise Exception("label '%s' not defined." % id)
 
         self.scope_table[-1].append(id)
         self.global_table.setdefault(id, [])    # add an empty list if the symbol is not in the table

@@ -249,15 +249,14 @@ class Parser:
         else:
             if p[1] is None:
                 p[1] = []
-            p[1].append(p[2])
+            p[1].append(p[3])
             p[0] = p[1]
     
     def p_case_exp(self, p):
-        '''case_exp : literal ':' stmt
-                    | ID ':' stmt
+        '''case_exp : exp ':' stmt
         '''
         # name is either identifier or constant
-        p[0] = CaseExp(name=p[1], stmt=p[3])
+        p[0] = CaseExp(exp=p[1], stmt=p[3])
     
     def p_goto_stmt(self, p):
         '''goto_stmt : GOTO ID
@@ -405,7 +404,7 @@ if __name__ == '__main__':
     with llvm.create_mcjit_compiler(llvm_module, tm) as ee:
         ee.finalize_object()
         print('=== Assembly')
-        print(tm.emit_assembly(llvm_module))
+        # print(tm.emit_assembly(llvm_module))
 
         cfptr = ee.get_function_address("gcd")
 

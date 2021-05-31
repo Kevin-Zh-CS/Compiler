@@ -4,9 +4,6 @@
             "path": ".."
         },
         {
-            "path": "../../Python-Pascal-Compiler"
-        },
-        {
             "path": "../../pcl"
         }
     ]

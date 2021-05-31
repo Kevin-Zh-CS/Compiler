@@ -52,7 +52,6 @@ class Body(Node):
             local.irgen()
         self.block.irgen()
 
-
 class VarList(Node):
     def __init__(self, var_list):
         super().__init__()
@@ -299,7 +298,6 @@ class Compound(Node):
     def irgen(self):
         for stmt in self.stmt_list:
             stmt.irgen()
-            
 
 class LabelStmt(Node):
     def __init__(self,id,non_label_stmt):
@@ -335,7 +333,10 @@ class Assign(Node):
         if self.lvalue.type != self.exp.type:
             raise Exception("unsupported operand type(s) for :=: '%s' and '%s'." % (self.lvalue.type, self.exp.type))
         # with Node.builder.goto_entry_block(): hihi
-        Node.builder.store(self.exp.ir_var, self.lvalue.addr)   # assign value
+        if isinstance(self.lvalue.addr, ir.Argument):   # it's a value instead of ptr
+            self.lvalue.addr = self.exp.ir_var
+        else:
+            Node.builder.store(self.exp.ir_var, self.lvalue.addr)   # assign value
 
 class LValue(Node):
     def __init__(self, id, exp):
@@ -353,7 +354,6 @@ class LValue(Node):
         if self.exp:    # array
             assert self.type == 'array'
             self.type = symbol_entry['ele_type']
-            # add1 = Node.builder.gep(addr, [ir.Constant(ir.IntType(32),0)])
             self.exp.irgen()
             # gep: get element ptr
             self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
@@ -405,17 +405,24 @@ class For(Node):
         self.exp2 = exp2
         self.stmt = stmt
 
-class Case(Node):
-    def __init__(self, exp, case_exp_list):
-        super().__init__()
-        self.exp  = exp
-        self.case_exp_list = case_exp_list
-
 class While(Node):
     def __init__(self, exp, stmt):
         super().__init__()
         self.exp = exp
         self.stmt = stmt
+    
+    def irgen(self):
+        while_block = Node.builder.append_basic_block()
+        next_block = Node.builder.append_basic_block()
+        self.exp.irgen()
+        # jump to either part depending on the exp value
+        Node.builder.cbranch(self.exp.ir_var, while_block, next_block)
+        Node.builder.position_at_start(while_block)
+        self.stmt.irgen()   # generate statements in while body
+        self.exp.irgen()
+        # jump back to while body if the condition is satisfied
+        Node.builder.cbranch(self.exp.ir_var, while_block, next_block)
+        Node.builder.position_at_start(next_block)
 
 class Repeat(Node):
     def __init__(self, stmt_list, exp):
@@ -429,12 +436,56 @@ class If(Node):
         self.exp = exp
         self.stmt = stmt
         self.else_stmt = else_stmt
+    
+    def irgen(self):
+        self.exp.irgen()
+
+        if self.else_stmt:
+            with Node.builder.if_else(self.exp.ir_var) as (then, otherwise):
+                with then:
+                    self.stmt.irgen()
+                with otherwise:
+                    self.else_stmt.irgen()
+        else:
+            with Node.builder.if_then(self.exp.ir_var):
+                self.stmt.irgen()
+
+class Case(Node):
+    def __init__(self, exp, case_exp_list):
+        super().__init__()
+        self.exp  = exp
+        self.case_exp_list = case_exp_list
+
+    def irgen(self):
+        self.exp.irgen()
+        next_block = Node.builder.append_basic_block("endcase")
+        switch_stmt = Node.builder.switch(self.exp.ir_var, next_block)
+
+        case_var_list = []
+        case_block_list = []
+        for case_exp in self.case_exp_list:
+            case_exp.exp.irgen()    # get the value of literal or id
+            case_var_list.append(case_exp.exp.ir_var)
+            block = Node.builder.append_basic_block("case")
+            case_block_list.append(block)
+            Node.builder.position_at_start(block)
+            case_exp.irgen()    # generate statements for this case
+            Node.builder.branch(next_block)
+        
+        for i in range(len(case_block_list)):
+            switch_stmt.add_case(case_var_list[i], case_block_list[i])
+        
+        Node.builder.position_at_start(next_block)
 
 class CaseExp(Node):
-    def __init__(self, name, stmt):
+    def __init__(self, exp, stmt):
         super().__init__()
-        self.name = name
+        self.exp = exp  # literal or id
         self.stmt = stmt
+    
+    def irgen(self):
+        self.stmt.irgen()
+        
 
 class Goto(Node):
     def __init__(self, id):
@@ -442,9 +493,6 @@ class Goto(Node):
         self.id = id
     
     def irgen(self):
-        tmp_block = Node.builder.append_basic_block()
-        Node.builder.branch(tmp_block)
-        Node.builder.position_at_start(tmp_block)
         goto_block = Node.symbol_table.get_symbol_addr(self.id)
         Node.builder.branch(goto_block)
         next_block = Node.builder.append_basic_block()
@@ -560,4 +608,3 @@ class Array(Node):
         # gep: get element ptr
         addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
         self.ir_var = Node.builder.load(addr)
-
