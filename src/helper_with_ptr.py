@@ -16,19 +16,19 @@ class SymbolTable():
                 self.global_table.pop(id)
         self.scope_table.pop()  # delete this scope
     
-    def add_symbol(self, id, type, value, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
+    def add_symbol(self, id, type, addr, length=0, low_bound=0, ele_type=None, ret_type=None, formal_list=[]):   
         if id in self.scope_table[-1]:
             if type == 'label':
-                assert value != None
-                if not self.global_table[id][-1]['value']:
-                    self.global_table[id][-1]['value'] = value
+                assert addr != None
+                if not self.global_table[id][-1]['addr']:
+                    self.global_table[id][-1]['addr'] = addr
                     return
                 else:
                     raise Exception("label %s reappeared." % id)
             else:
                 raise Exception("redefine symbol %s." % id)
         
-        if type == 'label' and value:
+        if type == 'label' and addr:
             raise Exception("label '%s' not defined." % id)
 
         self.scope_table[-1].append(id)
@@ -36,7 +36,7 @@ class SymbolTable():
 
         entry = {}
         entry['type'] = type
-        entry['value'] = value
+        entry['addr'] = addr
         if type not in Helper.base_type and type != 'string' and type != 'label':
             # array, function or procedure
             if type == 'array':
@@ -53,13 +53,6 @@ class SymbolTable():
                 raise Exception("invalid symbol type")
 
         self.global_table[id].append(entry)
-
-    def set_value(self, id, ir_var):
-        id_list = self.global_table.get(id, None)
-        if id_list:
-            id_list[-1]['value'] = ir_var
-        else:
-            raise Exception("no symbol named \'%s\'!" % id)
     
     def get_symbol(self, id):
         id_list = self.global_table.get(id, None)
@@ -71,8 +64,8 @@ class SymbolTable():
     def get_symbol_type(self, id):
         return self.get_symbol(id)['type']
     
-    def get_symbol_value(self, id):
-        return self.get_symbol(id)['value']
+    def get_symbol_addr(self, id):
+        return self.get_symbol(id)['addr']
 
 class Helper():
     base_type = {'int': ir.IntType(32),

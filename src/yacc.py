@@ -406,3 +406,14 @@ if __name__ == '__main__':
         ee.finalize_object()
         print('=== Assembly')
         print(tm.emit_assembly(llvm_module))
+
+        cfptr = ee.get_function_address("gcd")
+
+        from ctypes import CFUNCTYPE, c_int
+        # To convert an address to an actual callable thing we have to use
+        # CFUNCTYPE, and specify the arguments & return type.
+        cfunc = CFUNCTYPE(c_int, c_int)(cfptr)
+
+        # Now 'cfunc' is an actual callable we can invoke
+        res = cfunc(24, 11)
+        print('The result is', res)

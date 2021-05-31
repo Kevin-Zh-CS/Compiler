@@ -1,22 +1,29 @@
 program sample;
 { ------------------------------------------------------------ }
 var
-tcase, a, b: Int;
-c: Char = 'a';
-r: Real;
-bl: Bool = True;
-{ 我们的程序中string必须初始化 }
-s: String = 'Hello';	{ only support single quote }
-array1: array[5] of char;
-array2: array[2] of bool;
+a : int;
+r : real;
 
 { ------------------------------ }
-{ 返回值暂时只支持int, real, bool, char }
-
+function gcd(a: Int; b: Int): Int;	{ header }
+{ local declaration }
+var
+array1: array[2] of int;
+function my_mod(a: Int; b: Int): Int;
+begin
+	my_mod := a + b
+end;
+{ local declaration end }
+begin
+    array1[1] := 2;
+{    if true then}
+	gcd := my_mod(a, b)*array1[1]	{ * no semicolon }
+end;
 { ------------------------------ }
+
 BEGIN 
-{ a := Int(c) + Int(num); }
-
 r := 1.0
+{ a := gcd(1, 2) }
+{ array1[0] := 'a'; }
 { bl := gcd(a, b) + -5 }
 end.
