@@ -8,6 +8,33 @@ from helper import Helper, SymbolTable
 
 tokens = Lexer.tokens
 
+def IO_func(funcname, args):
+    voidptr_ty = ir.IntType(8).as_pointer()
+    io_funcname = "scanf" if funcname[:4] == "read" else "printf"
+    io_function = Node.symbol_table.get_symbol(io_funcname)['addr']
+
+    left_str = "".join([Helper.write_op[arg.type] for arg in args])
+    if funcname[-2:] == "ln":
+        left_str += "\n"
+    left_str += "\0"
+    c_fmt = ir.Constant(ir.ArrayType(ir.IntType(8), len(left_str)),
+                        bytearray(left_str.encode("utf8")))
+    c_str = Node.builder.alloca(c_fmt.type)
+    Node.builder.store(c_fmt, c_str)
+    fmt_arg = Node.builder.bitcast(c_str, voidptr_ty)
+    if io_funcname=="scanf":
+        Node.builder.call(io_function, [fmt_arg, *[Node.symbol_table.get_symbol_addr(arg.id) for arg in args]])
+    else:
+        Node.builder.call(io_function, [fmt_arg, *[arg.ir_var for arg in args]])
+
+def register_IO():
+    voidptr_ty = ir.IntType(8).as_pointer()
+    printf_ty = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg=True)
+    scanf_ty = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg=True)
+    printf_function = ir.Function(Node.module, printf_ty, name="printf")
+    scanf_function = ir.Function(Node.module, scanf_ty, name="scanf")
+    Node.symbol_table.add_symbol("printf", "function", printf_function, ret_type=ir.IntType(32), formal_list=[voidptr_ty])
+    Node.symbol_table.add_symbol("scanf", "function", scanf_function, ret_type=ir.IntType(32), formal_list=[voidptr_ty])
 
 class Node(ABC):
     builder = None
@@ -35,7 +62,7 @@ class Program(Node):
         block = main_func.append_basic_block()
         # declare builder
         Node.builder = ir.IRBuilder(block)
-        
+        register_IO()
         self.body.irgen()
         Node.builder.ret_void()  # end of main block
 
@@ -396,6 +423,8 @@ class Call(Node):
                 self.ir_var = Node.builder.sitofp(self.exp_list[0].ir_var, Helper.base_type['real'])
             else:
                 raise Exception("unsupported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
+        elif self.id in Helper.IO_type:
+            IO_func(self.id,self.exp_list)
         else:
             func = Node.symbol_table.get_symbol(self.id)
             assert func['type'] == 'function'
