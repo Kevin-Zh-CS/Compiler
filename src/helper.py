@@ -74,6 +74,15 @@ class Helper():
                  'bool': ir.IntType(1)
                 }
 
+    IO_type = ['writeln', 'readln', 'write', 'read']
+
+    write_op = {'int': "%i",
+                'real': "%f",
+                'char': "%c",
+                'bool': "%i",
+                'string': "%s"
+                }
+
     artimetic_op = ['+', '-', '*', '/', '%']
     relation_op = ['=', '<>', '<', '>', '<=', '>=']
     logic_op = ['not', 'and']
