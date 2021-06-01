@@ -1,3 +1,4 @@
+from ctypes import c_double, c_float
 import llvmlite.binding as llvm
 from ply import yacc
 from lexer import Lexer

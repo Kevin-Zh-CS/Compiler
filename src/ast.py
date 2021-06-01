@@ -37,7 +37,6 @@ def IO_func(funcname, args):
         args = [fmt_arg, *[get_format(arg) for arg in args]]
     Node.builder.call(io_function,args)
 
-
 def register_IO():
     voidptr_ty = ir.IntType(8).as_pointer()
     printf_ty = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg=True)
@@ -133,18 +132,23 @@ class Var(Node):
             else:
                 Node.symbol_table.add_symbol(id, self.type, addr)
 
-
 class ConstExp(Node):
     def __init__(self, id_list, var):
         super().__init__()
         self.id_list = id_list
         self.var = var  # LiteralVal
 
-    def irgen(self):    # hihi
+    def irgen(self):
         self.var.irgen()
-        if hasattr(self.var,"addr"):
-            self.addr = self.var.addr
-        self.ir_var = self.var.ir_var
+        for id in self.id_list:
+            if self.var.type !="string":
+                addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
+                addr.linkage = 'internal'
+                Node.builder.store(self.var.ir_var, addr)  # initialize value
+                addr.global_constant = True # declare as a constant
+                Node.symbol_table.add_symbol(id, self.var.type, addr)
+            else:
+                Node.symbol_table.add_symbol(id, self.var.type, self.var.addr)
 
 class IdExp(Node):
     def __init__(self, id):
@@ -375,7 +379,6 @@ class Assign(Node):
         # check type
         if self.lvalue.type != self.exp.type:
             raise Exception("unsupported operand type(s) for :=: '%s' and '%s'." % (self.lvalue.type, self.exp.type))
-        # with Node.builder.goto_entry_block(): hihi
         if isinstance(self.lvalue.addr, ir.Argument):   # it's a value instead of ptr
             self.lvalue.addr = self.exp.ir_var
         else:

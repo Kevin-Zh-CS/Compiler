@@ -1,5 +1,7 @@
 program sample;
 { ------------------------------------------------------------ }
+const
+pi = 3.14159;
 var
 a : int;
 r : real;
@@ -10,8 +12,11 @@ lb;
 { ------------------------------ }
 function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
+const
+e = 2.718;
 var
 array1: array[2] of int;
+str : string = 'e =';
 function my_mod(a: Int; b: Int): Int;
 begin
 	my_mod := a + b
@@ -60,7 +65,7 @@ lb:    if gcd < 20 then
     for a:=5 downto 0 do
         writeln(a);
 
-    writeln('PI =', ' ', '3.14159')
+    writeln(str, ' ', e)
 
     {goto lb}
 end;
