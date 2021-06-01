@@ -68,10 +68,10 @@ lb:    if gcd < 20 then
         gcd := gcd + 1
     until gcd % 2 = 0;
 
-    for a:=5 downto 0 do
+    for a := 5 downto -2 do
         writeln(a);
 
-    writeln(str, ' ', e);
+    writeln(str, ' ', a);
     print_end()
 
     {goto lb}

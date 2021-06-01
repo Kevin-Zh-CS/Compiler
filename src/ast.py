@@ -470,6 +470,7 @@ class For(Node):
     
     def irgen(self):
         for_block = Node.builder.append_basic_block()
+        buff_block = Node.builder.append_basic_block()  # eliminate excess increment/decrement
         next_block = Node.builder.append_basic_block()
 
         assign_stmt = Assign(lvalue=LValue(self.id, None), exp=self.exp1)
@@ -484,7 +485,6 @@ class For(Node):
             relat_op = '>='
             inc_dec_var = ir.Constant(ir.IntType(32), -1)
 
-        # left_ir_var = Node.builder.load(Node.symbol_table.get_symbol_addr(self.id))
         left_ir_var = self.exp1.ir_var
         cond = Node.builder.icmp_signed(relat_op, left_ir_var, right_ir_var)
         Node.builder.cbranch(cond, for_block, next_block)
@@ -495,7 +495,12 @@ class For(Node):
         Node.builder.store(Node.builder.add(left_ir_var, inc_dec_var), Node.symbol_table.get_symbol_addr(self.id))  # inc of dec
         left_ir_var = Node.builder.load(Node.symbol_table.get_symbol_addr(self.id)) # value after inc/dec
         cond = Node.builder.icmp_signed(relat_op, left_ir_var, right_ir_var)
-        Node.builder.cbranch(cond, for_block, next_block)
+        Node.builder.cbranch(cond, for_block, buff_block)
+        # buff block is used to eliminate excess inc/dec
+        # e.g., for a:= 0 to 5 do... after loops, the value of a should be 5 instead of 6
+        Node.builder.position_at_start(buff_block)
+        Node.builder.store(Node.builder.sub(left_ir_var, inc_dec_var), Node.symbol_table.get_symbol_addr(self.id))  # inc of dec
+        Node.builder.branch(next_block)
         Node.builder.position_at_start(next_block)
 
 class While(Node):
