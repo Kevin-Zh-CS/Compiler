@@ -8,6 +8,13 @@ from helper import Helper, SymbolTable
 
 tokens = Lexer.tokens
 
+def get_format(Node):
+    if hasattr(Node,"addr"):
+        return Node.addr
+    if hasattr(Node,"type") and Node.type == "string":
+        return Node.symbol_table.get_symbol_addr(Node.id)
+    return Node.ir_var
+
 def IO_func(funcname, args):
     voidptr_ty = ir.IntType(8).as_pointer()
     io_funcname = "scanf" if funcname[:4] == "read" else "printf"
@@ -25,9 +32,11 @@ def IO_func(funcname, args):
     for arg in args:
         print(arg.ir_var)
     if io_funcname=="scanf":
-        Node.builder.call(io_function, [fmt_arg, *[Node.symbol_table.get_symbol_addr(arg.id) for arg in args]])
+        args = [fmt_arg, *[Node.symbol_table.get_symbol_addr(arg.id) for arg in args]]
     else:
-        Node.builder.call(io_function, [fmt_arg, *[arg.addr if hasattr(arg,"addr") else arg.ir_var for arg in args]])
+        args = [fmt_arg, *[get_format(arg) for arg in args]]
+    Node.builder.call(io_function,args)
+
 
 def register_IO():
     voidptr_ty = ir.IntType(8).as_pointer()
@@ -111,17 +120,19 @@ class Var(Node):
             self.type = self.vartype
 
         for id in self.id_list:
-            addr = ir.GlobalVariable(Node.module, ir_type, name=id+Node.symbol_table.get_symbol_level(id))
+            addr = ir.GlobalVariable(Node.module, ir_type, name=id + Node.symbol_table.get_symbol_level(id))
             addr.linkage = 'internal'
             if self.exp:  # initialize variable
                 self.exp.irgen()
                 Node.builder.store(self.exp.ir_var, addr)  # store value
+
             # add to symbol table
             if isinstance(self.vartype, ArrayType):  # array
                 Node.symbol_table.add_symbol(id, self.type, addr, self.vartype.length, self.vartype.low_bound,
-                                                self.vartype.type)
+                                             self.vartype.type)
             else:
                 Node.symbol_table.add_symbol(id, self.type, addr)
+
 
 class ConstExp(Node):
     def __init__(self, id_list, var):
@@ -131,15 +142,9 @@ class ConstExp(Node):
 
     def irgen(self):    # hihi
         self.var.irgen()
-        for id in self.id_list:
-            if self.var.type !="string":
-                addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
-                addr.linkage = 'internal'
-                addr.global_constant = True # declare as a constant
-                Node.builder.store(self.var.ir_var, addr)  # store value
-                Node.symbol_table.add_symbol(id, self.var.type, addr)
-            else:
-                Node.symbol_table.add_symbol(id, self.var.type, self.var.addr)
+        if hasattr(self.var,"addr"):
+            self.addr = self.var.addr
+        self.ir_var = self.var.ir_var
 
 class IdExp(Node):
     def __init__(self, id):
@@ -149,7 +154,7 @@ class IdExp(Node):
     def irgen(self):
         self.type = Node.symbol_table.get_symbol_type(self.id)
         addr = Node.symbol_table.get_symbol(self.id)['addr']
-        if isinstance(addr, ir.Argument) or self.type == "string":   # function argument
+        if isinstance(addr, ir.Argument):   # function argument
             self.ir_var = addr
         else:
             self.ir_var = Node.builder.load(addr)
@@ -158,12 +163,13 @@ class LiteralVar(Node):
     def __init__(self, var, type):
         super().__init__()
         self.var = var
+        if type == "string":
+            self.var+='\0'
         self.type = type  # a string in ['int', 'real', 'bool', 'char', 'string']
 
     def irgen(self):
         ''' set self.ir_var '''
         if self.type == 'string':
-            self.var += '\0'
             self.ir_type = Helper.get_ir_type(self.type, str=self.var)
             self.ir_var = Helper.get_ir_var(self.ir_type, self.var, is_str=1)
             self.addr = Node.builder.alloca(self.ir_type)
