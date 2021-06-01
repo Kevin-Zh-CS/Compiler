@@ -124,7 +124,7 @@ class Var(Node):
             addr.linkage = 'internal'
             if self.exp:  # initialize variable
                 self.exp.irgen()
-                Node.builder.store(self.exp.ir_var, addr)  # store value
+                addr.initializer = self.exp.ir_var
 
             # add to symbol table
             if isinstance(self.vartype, ArrayType):  # array
