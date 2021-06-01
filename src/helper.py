@@ -4,7 +4,8 @@ class SymbolTable():
 
     def __init__(self):
         self.global_table = {}
-        self.scope_table = [[]]   # each item stores symbols' id for a single scope
+        self.scope_table = []   # each item stores symbols' id for a single scope
+        self.level_table = {}
     
     def open_scope(self):
         self.scope_table.append([])
@@ -27,9 +28,6 @@ class SymbolTable():
                 raise Exception("label %s reappeared." % id)
         if id in self.scope_table[-1]:
             raise Exception("redefine symbol %s." % id)
-        
-        # if type == 'label' and addr:
-        #     raise Exception("label '%s' not defined." % id)
 
         self.scope_table[-1].append(id)
         self.global_table.setdefault(id, [])    # add an empty list if the symbol is not in the table
@@ -68,11 +66,9 @@ class SymbolTable():
         return self.get_symbol(id)['addr']
     
     def get_symbol_level(self, id):
-        id_list = self.global_table.get(id, None)
-        if id_list:
-            return '_'+str(len(id_list))
-        else:
-            return '_0'
+        self.level_table.setdefault(id, -1)
+        self.level_table[id] += 1
+        return '_'+str(self.level_table[id])
 
 class Helper():
     base_type = {'int': ir.IntType(32),

@@ -123,9 +123,9 @@ class Parser:
                   | PROCEDURE ID '(' ')'
         '''
         if len(p) == 5: # no fomal_list
-            p[0] = ProcHeader(id=p[2], formal_list=p[4])
-        else:
             p[0] = ProcHeader(id=p[2], formal_list=[])
+        else:
+            p[0] = ProcHeader(id=p[2], formal_list=p[4])
     
     def p_header2(self, p):
         '''header : FUNCTION ID '(' formal_list ')' ':' vartype

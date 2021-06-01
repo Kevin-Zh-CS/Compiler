@@ -10,6 +10,11 @@ label
 lb;
 
 { ------------------------------ }
+procedure print_end();
+begin
+    writeln('function ends.')
+end;
+
 function gcd(a: Int; b: Int): Int;	{ header }
 { local declaration }
 const
@@ -17,7 +22,7 @@ e = 2.718;
 var
 array1: array[2] of int;
 str : string = 'e =';
-function my_mod(a: Int; b: Int): Int;
+function my_mod(a: Int; b: Int; c: array[2] of int): Int;
 begin
 	my_mod := a + b
 end;
@@ -30,7 +35,8 @@ begin
             gcd := -3
         else begin
             array1[1] := 3;
-            gcd := my_mod(a, b)*array1[1]	{ * no semicolon }
+            gcd := my_mod(a, b, array1)*array1[1];
+            writeln('test rst : ', gcd)
         end
     end
     else gcd := int(5.0);
@@ -65,7 +71,8 @@ lb:    if gcd < 20 then
     for a:=5 downto 0 do
         writeln(a);
 
-    writeln(str, ' ', e)
+    writeln(str, ' ', e);
+    print_end()
 
     {goto lb}
 end;

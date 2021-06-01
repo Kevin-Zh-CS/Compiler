@@ -71,9 +71,14 @@ class Program(Node):
         block = main_func.append_basic_block()
         # declare builder
         Node.builder = ir.IRBuilder(block)
+        # open scope for the whole program
+        Node.symbol_table.open_scope()
+
         register_IO()
+
         self.body.irgen()
         Node.builder.ret_void()  # end of main block
+        Node.symbol_table.close_scope()
 
 class Body(Node):
     def __init__(self, block, local_list):
@@ -439,17 +444,18 @@ class Call(Node):
             IO_func(self.id,self.exp_list)
         else:
             func = Node.symbol_table.get_symbol(self.id)
-            assert func['type'] == 'function'
+            assert func['type'] == 'function' or func['type'] == 'procedure'
             formal_list = func['formal_list']
-            self.type = func['ret_type']
+            if func['type'] == 'function':
+                self.type = func['ret_type']
             # check arguments number
             if len(formal_list) != len(self.exp_list):
-                raise Exception("%s() takes %d positional arguments but %d were given." % (self.id, len(formal_list)),
-                                len(self.exp_list))
+                raise Exception("%s() takes %d positional arguments but %d were given." % (self.id, len(formal_list),
+                                len(self.exp_list)))
             # check arguments type
             for i in range(len(self.exp_list)):
                 if self.exp_list[i].type != formal_list[i]:
-                    raise Exception("%s() gets wrong parameter type." % self.type)
+                    raise Exception("%s() gets wrong parameter type." % self.id)
             # pass all check points
             self.ir_var = Node.builder.call(func['addr'], [exp.ir_var for exp in self.exp_list])
 
