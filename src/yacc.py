@@ -157,7 +157,6 @@ class Parser:
             p[1].append(p[3])
             p[0] = p[1]
 
-    ######
     def p_vartype1(self, p):
         '''vartype : INT
                    | REAL
@@ -301,7 +300,6 @@ class Parser:
         '''else_stmt : ELSE stmt 
                      | empty %prec DANGLING
         '''
-        # precedence ???
         if p[1] == 'else':
             p[0] = p[2]
         else:
