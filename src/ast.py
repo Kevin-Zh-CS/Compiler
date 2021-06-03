@@ -9,10 +9,11 @@ from helper import Helper, SymbolTable
 tokens = Lexer.tokens
 
 def get_format(Node):
-    if hasattr(Node,"addr"):
-        return Node.addr
+    if hasattr(Node,"str_addr"):
+        return Node.str_addr
     if hasattr(Node,"type") and Node.type == "string":
         return Node.symbol_table.get_symbol_addr(Node.id)
+
     return Node.ir_var
 
 def IO_func(funcname, args):
@@ -29,8 +30,6 @@ def IO_func(funcname, args):
     c_str = Node.builder.alloca(c_fmt.type)
     Node.builder.store(c_fmt, c_str)
     fmt_arg = Node.builder.bitcast(c_str, voidptr_ty)
-    for arg in args:
-        print(arg.ir_var)
     if io_funcname=="scanf":
         args = [fmt_arg, *[Node.symbol_table.get_symbol_addr(arg.id) for arg in args]]
     else:
@@ -181,8 +180,8 @@ class LiteralVar(Node):
         if self.type == 'string':
             self.ir_type = Helper.get_ir_type(self.type, str=self.var)
             self.ir_var = Helper.get_ir_var(self.ir_type, self.var, is_str=1)
-            self.addr = Node.builder.alloca(self.ir_type)
-            Node.builder.store(self.ir_var, self.addr)
+            self.str_addr = Node.builder.alloca(self.ir_type)
+            Node.builder.store(self.ir_var, self.str_addr)
         else:
             self.ir_type = Helper.get_ir_type(self.type)
             self.ir_var = Helper.get_ir_var(self.ir_type, self.var)
