@@ -405,9 +405,11 @@ class LValue(Node):
         if self.exp:  # array
             assert self.type == 'array'
             self.type = symbol_entry['ele_type']
-            self.exp.irgen()
+            low_bound = symbol_entry['low_bound']
+            exp_ind = BinExp('-', self.exp, LiteralVar(low_bound, 'int'))
+            exp_ind.irgen()
             # gep: get element ptr
-            self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32), 0), self.exp.ir_var])
+            self.addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), exp_ind.ir_var])
 
 class Call(Node):
     # include type conversion, e.g., Int(10.1)
@@ -439,11 +441,11 @@ class Call(Node):
                 self.type = 'char'
                 self.ir_var = Node.builder.trunc(self.exp_list[0].ir_var, Helper.base_type['char'])
             else:
-                raise Exception("unsupported type conversion from %s to %s." % (self.id, self.exp_list[0].type))
+                raise Exception("unsupported type conversion from %s to %s." % (self.exp_list[0].type, self.id))
         elif self.id in Helper.IO_type:
             IO_func(self.id,self.exp_list)
         else:
-            func = Node.symbol_table.get_symbol(self.id)
+            func = Node.symbol_table.get_symbol(self.id, is_func=1)
             assert func['type'] == 'function' or func['type'] == 'procedure'
             formal_list = func['formal_list']
             if func['type'] == 'function':
@@ -716,7 +718,11 @@ class Array(Node):
 
         assert self.type == 'array'
         self.type = symbol_entry['ele_type']
-        self.exp.irgen()
+
+        # calculate the absolute subindex
+        low_bound = symbol_entry['low_bound']
+        exp_ind = BinExp('-', self.exp, LiteralVar(low_bound, 'int'))
+        exp_ind.irgen()
         # gep: get element ptr
-        addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), self.exp.ir_var])
+        addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), exp_ind.ir_var])
         self.ir_var = Node.builder.load(addr)

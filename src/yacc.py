@@ -385,7 +385,8 @@ if __name__ == '__main__':
     
     parser = Parser()   # syntax analysis
 
-    fin = open("/Users/xy/Compiler/src/test_sample.txt")
+    # fin = open("/Users/xy/Compiler/pascal/RecursiveFunctionTest.pas")
+    fin = open("/Users/xy/Compiler/src/test.txt")
     root = parser.parse(fin.read().lower())
     fin.close()
 
@@ -414,3 +415,15 @@ if __name__ == '__main__':
         # Now 'cfunc' is an actual callable we can invoke
         res = cfunc(2, 11)
         print('The result is', res)
+
+
+        # cfptr = ee.get_function_address("Fibonacci")
+
+        # from ctypes import CFUNCTYPE, c_int
+        # # To convert an address to an actual callable thing we have to use
+        # # CFUNCTYPE, and specify the arguments & return type.
+        # cfunc = CFUNCTYPE(c_int)(cfptr)
+
+        # # Now 'cfunc' is an actual callable we can invoke
+        # res = cfunc(1)
+        # print('The result is', res)

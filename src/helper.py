@@ -52,10 +52,18 @@ class SymbolTable():
 
         self.global_table[id].append(entry)
     
-    def get_symbol(self, id):
+    def get_symbol(self, id, is_func=0):
         id_list = self.global_table.get(id, None)
         if id_list:
-            return id_list[-1]
+            if is_func ==0:
+                return id_list[-1]
+            else:
+                if id_list[-1]['type'] == 'function' or id_list[-1]['type'] == 'procedure':
+                    return id_list[-1]
+                elif id_list[-2]['type'] == 'function' or id_list[-2]['type'] == 'procedure':
+                    return id_list[-2]
+                else:
+                    raise Exception("%s is not callable!" % id)
         else:
             raise Exception("no symbol named \'%s\'!" % id)
     
