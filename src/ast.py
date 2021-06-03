@@ -326,8 +326,7 @@ class Formal(Node):
     def irgen(self, ir_var):
         ''' add ids to symbol table '''
         with Node.builder.goto_entry_block():
-            addr = ir.GlobalVariable(Node.module, self.ir_type, name=self.id+Node.symbol_table.get_symbol_level(self.id))
-            addr.linkage = 'internal'
+            addr = Node.builder.alloca(self.ir_type)
             Node.builder.store(ir_var, addr)    # store input parameter to local variable
             if isinstance(self.vartype, ArrayType): # array
                 Node.symbol_table.add_symbol(self.id, self.type, addr, self.vartype.length, self.vartype.low_bound, self.vartype.type)

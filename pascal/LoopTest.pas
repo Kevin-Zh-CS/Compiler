@@ -1,20 +1,20 @@
 program LoopTest;
 
 var 
-    i : integer;
+    i : int;
 
 begin
-    for i := 1 to 3 do
+    for i := 9 downto 5 do
     begin
-        writeln(i);
+        writeln(i)
     end
     ;
 
     while i > 0 do 
     begin 
         writeln(i);
-        i := i - 1;
+        i := i - 1
     end
-    ;
+
 end
 .

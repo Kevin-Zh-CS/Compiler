@@ -1,4 +1,4 @@
-program sample;
+program test_sample;
 { ------------------------------------------------------------ }
 const
 pi = 3.14159;
@@ -20,11 +20,11 @@ function gcd(a: Int; b: Int): Int;	{ header }
 const
 e = 2.718;
 var
-array1: array[2] of int;
+array1: array[1..3] of int;
 str : string = 'e =';
-function my_mod(a: Int; b: Int; c: array[2] of int): Int;
+function sum(a: Int; b: Int; c: array[2] of int): Int;
 begin
-	my_mod := a + b
+	sum := a + b
 end;
 { local declaration end }
 begin
@@ -35,7 +35,7 @@ begin
             gcd := -3
         else begin
             array1[1] := 3;
-            gcd := my_mod(a, b, array1)*array1[1];
+            gcd := sum(a, b, array1)*array1[1];
             writeln('test rst : ', gcd)
         end
     end

@@ -1,18 +1,16 @@
 program GotoTest;
 
 var 
-    i : integer;
+    i : int;
+label
+    lb;
 
 begin
     i := 2;
-0:
+lb:
     writeln('a');
     i := i - 1;
     if i > 0 then
-    begin
-        goto 0;
-    end
-    ;
-
+        goto lb
 end
 .

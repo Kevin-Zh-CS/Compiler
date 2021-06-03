@@ -1,13 +1,13 @@
-program buildInTypeTest;
+program BuildInTypeTest;
 const
 	ic = 1;
 	rc = 1.5;
 	bc = false;
 	cc = 'a';
 var
-	iv : integer;
+	iv : int;
 	rv : real;
-	bv : boolean;
+	bv : bool;
 	cv : char;
 
 begin
@@ -22,6 +22,6 @@ begin
     writeln(iv);
     writeln(rv);
     writeln(bv);
-    writeln(cv);
+    writeln(cv)
 end
 .

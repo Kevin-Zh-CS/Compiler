@@ -1,8 +1,8 @@
-program hello;
+program SimpleFunctionTest;
 
-function add(a, b : integer) : integer;
+function add(a, b : int) : int;
 begin
-	add := a + b;
+	add := a + b
 end
 ;
 

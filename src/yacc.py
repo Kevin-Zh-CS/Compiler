@@ -1,5 +1,3 @@
-from ctypes import c_double, c_float
-import llvmlite.binding as llvm
 from ply import yacc
 from lexer import Lexer
 from ast import *
@@ -380,50 +378,3 @@ class Parser:
 
     def p_error(self, p):
         print('Syntax error! Line:', self.lexer.lexer.lineno)
-
-if __name__ == '__main__':
-    
-    parser = Parser()   # syntax analysis
-
-    # fin = open("/Users/xy/Compiler/pascal/RecursiveFunctionTest.pas")
-    fin = open("/Users/xy/Compiler/src/test.txt")
-    root = parser.parse(fin.read().lower())
-    fin.close()
-
-    root.irgen()    # intermediate representation generation
-
-    print('=== LLVM IR')
-    print(root.module)
-
-    # Convert textual LLVM IR into in-memory representation.
-    llvm_module = llvm.parse_assembly(str(root.module))
-    tm = llvm.Target.from_default_triple().create_target_machine()
-
-    # Compile the module to machine code using MCJIT
-    with llvm.create_mcjit_compiler(llvm_module, tm) as ee:
-        ee.finalize_object()
-        print('=== Assembly')
-        # print(tm.emit_assembly(llvm_module))
-
-        cfptr = ee.get_function_address("gcd")
-
-        from ctypes import CFUNCTYPE, c_int
-        # To convert an address to an actual callable thing we have to use
-        # CFUNCTYPE, and specify the arguments & return type.
-        cfunc = CFUNCTYPE(c_int, c_int)(cfptr)
-
-        # Now 'cfunc' is an actual callable we can invoke
-        res = cfunc(2, 11)
-        print('The result is', res)
-
-
-        # cfptr = ee.get_function_address("Fibonacci")
-
-        # from ctypes import CFUNCTYPE, c_int
-        # # To convert an address to an actual callable thing we have to use
-        # # CFUNCTYPE, and specify the arguments & return type.
-        # cfunc = CFUNCTYPE(c_int)(cfptr)
-
-        # # Now 'cfunc' is an actual callable we can invoke
-        # res = cfunc(1)
-        # print('The result is', res)
