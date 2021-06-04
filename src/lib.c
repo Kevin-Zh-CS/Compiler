@@ -1,9 +1,4 @@
-/* gonert.c
 
-   This file contains runtime support functions for the Gone language
-   as well as boot-strapping code related to getting the main program
-   to run.
-*/
 
 #include <stdio.h>
 
