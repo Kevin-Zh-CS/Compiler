@@ -29,13 +29,13 @@ Then install the required packages:
 pip install -r requirements.txt
 ```
 
-you also have to install clang. this process will be omittd here.
+you also have to install clang. this process will be omitted here.
 
 ### Run Pas_compiler
 
 ```
 python src/main.py <input_file> 
-		<-o output_file>    # output_file name, "a.out" as default
+	<-o output_file>    # output_file name, "a.out" as default
   	<-O optim_level>    # optimization_level, 2 as default
   	<-ir ir_file>       # ir file name, program won't output ir file as default
   	<-asm asm_file>     # asm file name, won't output machine code as default
