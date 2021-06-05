@@ -5,7 +5,6 @@ import subprocess
 import os
 import argparse
 
-_rtlib = os.path.join(os.path.dirname(__file__), 'lib.c')
 
 
 def optimize(ir, args):
@@ -44,7 +43,7 @@ if __name__ == '__main__':
     with tempfile.NamedTemporaryFile(suffix='.ll') as f:
         f.write(str(llvm_module).encode('utf-8'))
         f.flush()
-        subprocess.check_output(["clang", output_file,'-DNEED_MAIN', f.name, _rtlib])
+        subprocess.check_output(["clang", output_file, f.name])
 
     tm = llvm.Target.from_default_triple().create_target_machine()
     # Compile the module to machine code using MCJIT
