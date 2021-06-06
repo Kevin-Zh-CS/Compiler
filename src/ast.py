@@ -66,7 +66,7 @@ class Program(Node):
         Node.module = ir.Module(__file__)
         # declare main function
         func_type = ir.FunctionType(ir.VoidType(), [])
-        main_func = ir.Function(self.module, func_type, "__main")
+        main_func = ir.Function(self.module, func_type, "main")
         block = main_func.append_basic_block()
         # declare builder
         Node.builder = ir.IRBuilder(block)

@@ -88,7 +88,7 @@ class Helper():
     IO_type = ['writeln', 'readln', 'write', 'read']
 
     write_op = {'int': "%i",
-                'real': "%f",
+                'real': "%lf",
                 'char': "%c",
                 'bool': "%i",
                 'string': "%s"
