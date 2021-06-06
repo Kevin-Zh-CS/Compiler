@@ -1,8 +1,6 @@
 program NestedFunctionTest;
-{ ------------------------------------------------------------ }
 var
 a, b: int;
-{ ------------------------------ }
 function gcd(a: Int; b: Int): Int;
 function my_mod(a: Int; b: Int): Int;
 begin
@@ -14,7 +12,6 @@ begin
 	else
 		gcd := gcd(b, my_mod(a, b))
 end;
-{ ------------------------------------------------------------ }
 begin
 	WriteLn('Please enter two integers: ');
 	Read(a, b);

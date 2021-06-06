@@ -1,10 +1,10 @@
 program ArrayTest;
 const
-	l = 1;
-	r = 6;
+	l = 2;
+	r = 8;
 var
 	iv : int;
-	a : array[1..6] of int;
+	a : array[2..8] of int;
 
 begin
 	iv := 0;  

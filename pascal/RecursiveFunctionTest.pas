@@ -23,6 +23,6 @@ end
 
 begin
     for i := 1 to 10 do
-        writeln(Fibonacci(i))
+        writeln('Fibonacci(', i, ') = ', Fibonacci(i))
 end
 .

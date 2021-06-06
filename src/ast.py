@@ -149,7 +149,6 @@ class ConstExp(Node):
                 addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
                 addr.linkage = 'internal'
                 Node.builder.store(self.var.ir_var, addr)  # initialize value
-                addr.global_constant = True # declare as a constant
                 Node.symbol_table.add_symbol(id, self.var.type, addr)
             else:
                 Node.symbol_table.add_symbol(id, self.var.type, self.var.addr)
@@ -654,7 +653,7 @@ class BinExp(Node):
             self.type = 'bool'
             op = Helper.ir_relation_op[self.operator]
             operant_type = self.exp1.type
-            if operant_type == 'int' or operant_type == 'bool':
+            if operant_type == 'int' or operant_type == 'bool' or operant_type == 'char':
                 self.ir_var = Node.builder.icmp_signed(op, self.exp1.ir_var, self.exp2.ir_var)
             else:
                 self.ir_var = Node.builder.fcmp_ordered(op, self.exp1.ir_var, self.exp2.ir_var)
