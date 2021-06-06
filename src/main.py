@@ -23,7 +23,7 @@ if __name__ == '__main__':
     args.add_argument("-O", "--optimization_level", type=int, help="specify the optimization level", default=2)
     args.add_argument("-ir", "--ir_file", help="generate ir code")
     args.add_argument("-asm", "--asm_file", help="generate machine code")
-    args.add_argument("-o", "--output_file", help="output file name", default="a.out")
+    args.add_argument("-o", "--output_file", help="output file name")
     args = args.parse_args()
 
     parser = Parser()  # syntax analysis
@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     llvm_module = optimize(str(root.module), args)
     # Compile the module to machine code using MCJIT
-    output_file = "-o " + args.output_file.strip()
+    output_file = "" if args.output_file is None else "-o " +args.output_file.strip()
     with tempfile.NamedTemporaryFile(suffix='.ll') as f:
         f.write(str(llvm_module).encode('utf-8'))
         f.flush()
