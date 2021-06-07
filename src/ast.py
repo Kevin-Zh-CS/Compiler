@@ -8,13 +8,20 @@ from helper import Helper, SymbolTable
 
 tokens = Lexer.tokens
 
-def get_format(Node):
+
+def get_rd_format(Node):
+    if hasattr(Node,"ar_addr"):
+        return Node.ar_addr
+    return Node.symbol_table.get_symbol_addr(Node.id)
+
+
+def get_wr_format(Node):
     if hasattr(Node,"str_addr"):
         return Node.str_addr
     if hasattr(Node,"type") and Node.type == "string":
         return Node.symbol_table.get_symbol_addr(Node.id)
-
     return Node.ir_var
+
 
 def IO_func(funcname, args):
     voidptr_ty = ir.IntType(8).as_pointer()
@@ -31,10 +38,11 @@ def IO_func(funcname, args):
     Node.builder.store(c_fmt, c_str)
     fmt_arg = Node.builder.bitcast(c_str, voidptr_ty)
     if io_funcname=="scanf":
-        args = [fmt_arg, *[Node.symbol_table.get_symbol_addr(arg.id) for arg in args]]
+        args = [fmt_arg, *[get_rd_format(arg) for arg in args]]
     else:
-        args = [fmt_arg, *[get_format(arg) for arg in args]]
+        args = [fmt_arg, *[get_wr_format(arg) for arg in args]]
     Node.builder.call(io_function,args)
+
 
 def register_IO():
     voidptr_ty = ir.IntType(8).as_pointer()
@@ -42,8 +50,10 @@ def register_IO():
     scanf_ty = ir.FunctionType(ir.IntType(32), [voidptr_ty], var_arg=True)
     printf_function = ir.Function(Node.module, printf_ty, name="printf")
     scanf_function = ir.Function(Node.module, scanf_ty, name="scanf")
-    Node.symbol_table.add_symbol("printf", "function", printf_function, ret_type=ir.IntType(32), formal_list=[voidptr_ty])
-    Node.symbol_table.add_symbol("scanf", "function", scanf_function, ret_type=ir.IntType(32), formal_list=[voidptr_ty])
+    Node.symbol_table.add_symbol("printf", "function", printf_function,
+                                 ret_type=ir.IntType(32), formal_list=[voidptr_ty])
+    Node.symbol_table.add_symbol("scanf", "function", scanf_function,
+                                 ret_type=ir.IntType(32), formal_list=[voidptr_ty])
 
 class Node(ABC):
     builder = None
@@ -149,6 +159,7 @@ class ConstExp(Node):
                 addr = ir.GlobalVariable(Node.module, self.var.ir_type, name=id+Node.symbol_table.get_symbol_level(id))
                 addr.linkage = 'internal'
                 Node.builder.store(self.var.ir_var, addr)  # initialize value
+                addr.global_constant = True # declare as a constant
                 Node.symbol_table.add_symbol(id, self.var.type, addr)
             else:
                 Node.symbol_table.add_symbol(id, self.var.type, self.var.addr)
@@ -653,7 +664,7 @@ class BinExp(Node):
             self.type = 'bool'
             op = Helper.ir_relation_op[self.operator]
             operant_type = self.exp1.type
-            if operant_type == 'int' or operant_type == 'bool' or operant_type == 'char':
+            if operant_type == 'int' or operant_type == 'bool':
                 self.ir_var = Node.builder.icmp_signed(op, self.exp1.ir_var, self.exp2.ir_var)
             else:
                 self.ir_var = Node.builder.fcmp_ordered(op, self.exp1.ir_var, self.exp2.ir_var)
@@ -721,5 +732,5 @@ class Array(Node):
         exp_ind = BinExp('-', self.exp, LiteralVar(low_bound, 'int'))
         exp_ind.irgen()
         # gep: get element ptr
-        addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), exp_ind.ir_var])
-        self.ir_var = Node.builder.load(addr)
+        self.ar_addr = Node.builder.gep(self.addr, [ir.Constant(ir.IntType(32),0), exp_ind.ir_var])
+        self.ir_var = Node.builder.load(self.ar_addr)
